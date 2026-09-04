@@ -1,0 +1,256 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  DONOR
+  REQUESTER
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Urgency {
+  NORMAL
+  URGENT
+  CRITICAL
+}
+
+enum BloodRequestStatus {
+  PENDING
+  MATCHED
+  FULFILLED
+  CANCELLED
+  EXPIRED
+}
+
+enum DonorResponseStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  VERIFIED
+  CANCELLED
+}
+
+enum PaymentProvider {
+  STRIPE
+  SSLCOMMERZ
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  BLOOD_REQUEST
+  DONATION
+  PAYMENT
+  SYSTEM
+}
+
+
+model User {
+  id                 String           @id @default(uuid())
+  name               String           @db.VarChar(255)
+  email              String           @unique
+  password           String
+  phone              String?
+  role               UserRole
+  status             UserStatus       @default(ACTIVE)
+
+  donorProfile       DonorProfile?
+  bloodRequests      BloodRequest[]
+  donorResponses     DonorResponse[]
+  donationsAsDonor   Donation[]       @relation("DonorDonations")
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  payments           Payment[]         @relation("RequesterPayments")
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+
+  @@map("user")
+}
+
+model DonorProfile {
+  id                String       @id @default(uuid())
+  userId            String       @unique
+  bloodGroup        BloodGroup
+  dateOfBirth       DateTime
+  gender            Gender
+  city              String
+  area              String
+  lastDonationDate  DateTime?
+  isAvailable       Boolean      @default(true)
+
+  user              User         @relation(fields: [userId],references: [id])
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@map("donor_profile")
+}
+
+model BloodRequest {
+  id              String              @id @default(uuid())
+  requesterId     String
+  bloodGroup      BloodGroup
+  units            Int
+  hospitalName    String
+  hospitalAddress String
+  city            String
+  requiredDate    DateTime
+  urgency         Urgency
+  status          BloodRequestStatus   @default(PENDING)
+  isPriority      Boolean              @default(false)
+  description     String?
+  deletedAt       DateTime?
+
+  requester       User                 @relation( fields: [requesterId], references: [id])
+
+  responses       DonorResponse[]
+  donations       Donation[]
+  payments        Payment[]
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@map("blood_request")
+}
+
+model DonorResponse {
+  id              String               @id @default(uuid())
+  bloodRequestId  String
+  donorId         String
+  status          DonorResponseStatus  @default(PENDING)
+  message         String?
+  respondedAt     DateTime?
+
+  bloodRequest    BloodRequest         @relation(fields: [bloodRequestId],references: [id])
+
+  donor           User                 @relation(fields: [donorId],references: [id])
+
+  donation        Donation?
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@unique([bloodRequestId, donorId])
+  @@map("donor_response")
+}
+
+model Donation {
+  id              String          @id @default(uuid())
+  bloodRequestId  String
+  donorId         String
+  responseId      String          @unique
+  status          DonationStatus
+  donationDate    DateTime
+  units           Int
+  verifiedAt      DateTime?
+  notes           String?
+
+  bloodRequest    BloodRequest    @relation(fields: [bloodRequestId],references: [id])
+
+  donor           User            @relation("DonorDonations",fields: [donorId],references: [id])
+
+  response        DonorResponse   @relation(fields: [responseId],references: [id])
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("donation")
+}
+
+model Payment {
+  id              String           @id @default(uuid())
+  requesterId     String
+  bloodRequestId  String
+  amount          Decimal
+  currency        String
+  provider        PaymentProvider
+  transactionId   String?
+  status          PaymentStatus
+  paidAt          DateTime?
+
+  requester       User             @relation("RequesterPayments",fields: [requesterId],references: [id])
+
+  bloodRequest    BloodRequest     @relation(fields: [bloodRequestId],references: [id])
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("payment")
+}
+
+model Notification {
+  id          String            @id @default(uuid())
+  userId      String
+  title       String
+  message     String
+  type        NotificationType
+  isRead      Boolean           @default(false)
+
+  user        User              @relation(fields: [userId],references: [id])
+
+  createdAt   DateTime          @default(now())
+
+  @@map("notification")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  userId      String
+  action      String
+  entity      String
+  entityId    String
+  details     Json?
+  ipAddress   String?
+
+  user        User      @relation(fields: [userId],references: [id])
+
+  createdAt   DateTime  @default(now())
+
+  @@map("audit_log")
+}
