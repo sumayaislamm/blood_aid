@@ -7,4 +7,5 @@ export interface AuthenticatedRequest extends Request {
     };
 }
 export declare const authenticate: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
+export declare const authorize: (...allowedRoles: Array<"ADMIN" | "DONOR" | "REQUESTER">) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 //# sourceMappingURL=auth.middleware.d.ts.map

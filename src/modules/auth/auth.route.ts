@@ -1,18 +1,23 @@
-// import { Router } from "express";
-// import { register } from "./auth.controller";
-
-// const router = Router();
-
-// router.post("/register", register);
-
-// export default router;
-
 import { Router } from "express";
-import { login, register } from "./auth.controller";
+import { getMe, login, register } from "./auth.controller";
+import { authenticate, authorize } from "../../middlewares/auth.middleware";
 
 const router = Router();
 
 router.post("/register", register);
 router.post("/login", login);
+router.get("/me", authenticate, getMe);
+
+router.get(
+  "/admin-test",
+  authenticate,
+  authorize("ADMIN"),
+  (_req, res) => {
+    res.status(200).json({
+      success: true,
+      message: "Admin access granted",
+    });
+  }
+);
 
 export default router;

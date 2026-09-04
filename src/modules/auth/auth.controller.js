@@ -1,6 +1,7 @@
 // import type { Request, Response } from "express";
 // import { registerUser } from "./auth.service";
 import { loginUser, registerUser } from "./auth.service";
+import { prisma } from "../../lib/prisma";
 export const register = async (req, res) => {
     try {
         const user = await registerUser(req.body);
@@ -32,6 +33,50 @@ export const login = async (req, res) => {
         res.status(401).json({
             success: false,
             message,
+        });
+    }
+};
+//GET ME 
+export const getMe = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+        const user = await prisma.user.findUnique({
+            where: {
+                id: req.user.userId,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+                status: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "User profile fetched successfully",
+            data: user,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch user profile",
         });
     }
 };
