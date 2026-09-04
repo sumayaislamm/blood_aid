@@ -148,3 +148,37 @@ export const loginUser = async (data: LoginInput) => {
     },
   };
 };
+
+
+//Update User Input 
+interface UpdateUserInput {
+  name?: string;
+  phone?: string | null;
+}
+
+export const updateUser = async (
+  userId: string,
+  data: UpdateUserInput
+) => {
+  const user = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.phone !== undefined && { phone: data.phone }),
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return user;
+};

@@ -109,4 +109,26 @@ export const loginUser = async (data) => {
         },
     };
 };
+export const updateUser = async (userId, data) => {
+    const user = await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            ...(data.name !== undefined && { name: data.name }),
+            ...(data.phone !== undefined && { phone: data.phone }),
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+    return user;
+};
 //# sourceMappingURL=auth.service.js.map

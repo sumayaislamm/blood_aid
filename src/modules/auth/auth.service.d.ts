@@ -29,5 +29,19 @@ export declare const loginUser: (data: LoginInput) => Promise<{
         status: "ACTIVE";
     };
 }>;
+interface UpdateUserInput {
+    name?: string;
+    phone?: string | null;
+}
+export declare const updateUser: (userId: string, data: UpdateUserInput) => Promise<{
+    createdAt: Date;
+    email: string;
+    id: string;
+    name: string;
+    phone: string | null;
+    role: import("../../../generated/prisma/enums").UserRole;
+    status: import("../../../generated/prisma/enums").UserStatus;
+    updatedAt: Date;
+}>;
 export {};
 //# sourceMappingURL=auth.service.d.ts.map

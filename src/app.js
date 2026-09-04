@@ -1,5 +1,6 @@
 import express from "express";
 import authRoutes from "./modules/auth/auth.route";
+import bloodRequestRoutes from "./modules/blood-request/blood-request.route";
 const app = express();
 app.use(express.json());
 app.get("/", (_req, res) => {
@@ -8,7 +9,11 @@ app.get("/", (_req, res) => {
         message: "Blood Aid API is running",
     });
 });
+//auth routes
 app.use("/api/auth", authRoutes);
+//blood request routes
+app.use("/api/blood-requests", bloodRequestRoutes);
+//route not found handler
 app.use((_req, res) => {
     res.status(404).json({
         success: false,

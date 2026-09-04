@@ -1,6 +1,4 @@
-// import type { Request, Response } from "express";
-// import { registerUser } from "./auth.service";
-import { loginUser, registerUser } from "./auth.service";
+import { loginUser, registerUser, updateUser } from "./auth.service";
 import { prisma } from "../../lib/prisma";
 export const register = async (req, res) => {
     try {
@@ -36,7 +34,7 @@ export const login = async (req, res) => {
         });
     }
 };
-//GET ME 
+//GET ME
 export const getMe = async (req, res) => {
     try {
         if (!req.user) {
@@ -77,6 +75,30 @@ export const getMe = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch user profile",
+        });
+    }
+};
+//Update User Profile
+export const updateMe = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+        const user = await updateUser(req.user.userId, req.body);
+        res.status(200).json({
+            success: true,
+            message: "User profile updated successfully",
+            data: user,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update user profile",
         });
     }
 };
