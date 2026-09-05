@@ -1,6 +1,7 @@
 import express from "express";
 import authRoutes from "./modules/auth/auth.route";
 import bloodRequestRoutes from "./modules/blood-request/blood-request.route";
+import donorProfileRoutes from "./modules/donor-profile/donor-profile.route";
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use("/api/auth", authRoutes);
 //blood request routes
 
 app.use("/api/blood-requests", bloodRequestRoutes);
+
+// donor profile routes
+app.use("/api/donor-profile", donorProfileRoutes);
 
 //route not found handler
 

@@ -39,4 +39,74 @@ export const getBloodRequestById = async (id) => {
     });
     return request;
 };
+//Updates a blood request in the database
+export const updateBloodRequest = async (id, requesterId, data) => {
+    const request = await prisma.bloodRequest.findFirst({
+        where: {
+            id,
+            requesterId,
+            deletedAt: null,
+        },
+    });
+    if (!request) {
+        return null;
+    }
+    const updatedRequest = await prisma.bloodRequest.update({
+        where: {
+            id,
+        },
+        data: {
+            ...(data.bloodGroup !== undefined && {
+                bloodGroup: data.bloodGroup,
+            }),
+            ...(data.units !== undefined && {
+                units: data.units,
+            }),
+            ...(data.hospitalName !== undefined && {
+                hospitalName: data.hospitalName,
+            }),
+            ...(data.hospitalAddress !== undefined && {
+                hospitalAddress: data.hospitalAddress,
+            }),
+            ...(data.city !== undefined && {
+                city: data.city,
+            }),
+            ...(data.requiredDate !== undefined && {
+                requiredDate: new Date(data.requiredDate),
+            }),
+            ...(data.urgency !== undefined && {
+                urgency: data.urgency,
+            }),
+            ...(data.isPriority !== undefined && {
+                isPriority: data.isPriority,
+            }),
+            ...(data.description !== undefined && {
+                description: data.description,
+            }),
+        },
+    });
+    return updatedRequest;
+};
+//Deletes a blood request from the database
+export const deleteBloodRequest = async (id, requesterId) => {
+    const request = await prisma.bloodRequest.findFirst({
+        where: {
+            id,
+            requesterId,
+            deletedAt: null,
+        },
+    });
+    if (!request) {
+        return null;
+    }
+    const deletedRequest = await prisma.bloodRequest.update({
+        where: {
+            id,
+        },
+        data: {
+            deletedAt: new Date(),
+        },
+    });
+    return deletedRequest;
+};
 //# sourceMappingURL=blood-request.service.js.map

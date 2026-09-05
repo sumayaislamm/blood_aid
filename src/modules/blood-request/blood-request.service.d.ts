@@ -1,4 +1,4 @@
-import type { CreateBloodRequestInput } from "./blood-request.interface";
+import type { CreateBloodRequestInput, UpdateBloodRequestInput } from "./blood-request.interface";
 export declare const createBloodRequest: (requesterId: string, data: CreateBloodRequestInput) => Promise<{
     id: string;
     requesterId: string;
@@ -34,6 +34,40 @@ export declare const getAllBloodRequests: () => Promise<{
     updatedAt: Date;
 }[]>;
 export declare const getBloodRequestById: (id: string) => Promise<{
+    id: string;
+    requesterId: string;
+    bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
+    units: number;
+    hospitalName: string;
+    hospitalAddress: string;
+    city: string;
+    requiredDate: Date;
+    urgency: import("../../../generated/prisma/enums").Urgency;
+    status: import("../../../generated/prisma/enums").BloodRequestStatus;
+    isPriority: boolean;
+    description: string | null;
+    deletedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+} | null>;
+export declare const updateBloodRequest: (id: string, requesterId: string, data: UpdateBloodRequestInput) => Promise<{
+    id: string;
+    requesterId: string;
+    bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
+    units: number;
+    hospitalName: string;
+    hospitalAddress: string;
+    city: string;
+    requiredDate: Date;
+    urgency: import("../../../generated/prisma/enums").Urgency;
+    status: import("../../../generated/prisma/enums").BloodRequestStatus;
+    isPriority: boolean;
+    description: string | null;
+    deletedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+} | null>;
+export declare const deleteBloodRequest: (id: string, requesterId: string) => Promise<{
     id: string;
     requesterId: string;
     bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
