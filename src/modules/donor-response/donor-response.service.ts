@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import type { CreateDonorResponseInput, UpdateDonorResponseInput } from "./donor-response.interface";
+import type { CreateDonorResponseInput, UpdateDonorResponseInput, UpdateDonorResponseStatusInput } from "./donor-response.interface";
 
 export const createDonorResponse = async (
   donorId: string,
@@ -100,6 +100,53 @@ export const updateMyDonorResponse = async (
       ...(data.status === "CANCELLED"
         ? { respondedAt: new Date() }
         : {}),
+    },
+  });
+
+  return updatedResponse;
+};
+
+// Update the status of a donor response for a specific blood request
+
+export const updateDonorResponseStatus = async (
+  requesterId: string,
+  responseId: string,
+  data: UpdateDonorResponseStatusInput
+) => {
+  const response = await prisma.donorResponse.findUnique({
+    where: {
+      id: responseId,
+    },
+    include: {
+      bloodRequest: true,
+    },
+  });
+
+  if (!response) {
+    throw new Error("Donor response not found");
+  }
+
+  if (response.bloodRequest.requesterId !== requesterId) {
+    throw new Error(
+      "You can only manage responses to your own blood requests"
+    );
+  }
+
+  if (response.status !== "PENDING") {
+    throw new Error("Only pending responses can be accepted or rejected");
+  }
+
+  if (data.status !== "ACCEPTED" && data.status !== "REJECTED") {
+    throw new Error("Status must be ACCEPTED or REJECTED");
+  }
+
+  const updatedResponse = await prisma.donorResponse.update({
+    where: {
+      id: responseId,
+    },
+    data: {
+      status: data.status,
+      respondedAt: new Date(),
     },
   });
 

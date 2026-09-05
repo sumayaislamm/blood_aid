@@ -10,3 +10,6 @@ export interface UpdateDonorResponseInput {
   message?: string;
 }
 
+export interface UpdateDonorResponseStatusInput {
+  status: DonorResponseStatus;
+}

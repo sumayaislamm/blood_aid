@@ -3,7 +3,7 @@ import {
   authenticate,
   authorize,
 } from "../../middlewares/auth.middleware";
-import { createResponse, getMyResponses, updateMyResponse } from "./donor-response.controller";
+import { createResponse, getMyResponses, updateMyResponse, updateResponseStatus } from "./donor-response.controller";
 
 const router = Router();
 
@@ -20,6 +20,12 @@ router.get(
   authorize("DONOR"),
   getMyResponses
 );
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorize("REQUESTER"),
+  updateResponseStatus
+);
 
 router.patch(
   "/:id",
@@ -27,4 +33,6 @@ router.patch(
   authorize("DONOR"),
   updateMyResponse
 );
+
+
 export default router;
