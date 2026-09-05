@@ -1,4 +1,4 @@
-import type { CreateDonorResponseInput, UpdateDonorResponseInput } from "./donor-response.interface";
+import type { CreateDonorResponseInput, UpdateDonorResponseInput, UpdateDonorResponseStatusInput } from "./donor-response.interface";
 export declare const createDonorResponse: (donorId: string, data: CreateDonorResponseInput) => Promise<{
     id: string;
     bloodRequestId: string;
@@ -38,6 +38,16 @@ export declare const getMyDonorResponses: (donorId: string) => Promise<({
     updatedAt: Date;
 })[]>;
 export declare const updateMyDonorResponse: (donorId: string, responseId: string, data: UpdateDonorResponseInput) => Promise<{
+    id: string;
+    bloodRequestId: string;
+    donorId: string;
+    status: import("../../../generated/prisma/enums").DonorResponseStatus;
+    message: string | null;
+    respondedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare const updateDonorResponseStatus: (requesterId: string, responseId: string, data: UpdateDonorResponseStatusInput) => Promise<{
     id: string;
     bloodRequestId: string;
     donorId: string;

@@ -1,4 +1,4 @@
-import { createDonorResponse, getMyDonorResponses, updateMyDonorResponse, } from "./donor-response.service";
+import { createDonorResponse, getMyDonorResponses, updateDonorResponseStatus, updateMyDonorResponse, } from "./donor-response.service";
 export const createResponse = async (req, res) => {
     try {
         if (!req.user) {
@@ -70,6 +70,33 @@ export const updateMyResponse = async (req, res) => {
         const message = error instanceof Error
             ? error.message
             : "Failed to update donor response";
+        return res.status(400).json({
+            success: false,
+            message,
+        });
+    }
+};
+// Update donor response status for the authenticated donor
+export const updateResponseStatus = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+        const response = await updateDonorResponseStatus(req.user.userId, req.params.id, req.body);
+        return res.status(200).json({
+            success: true,
+            message: "Donor response status updated successfully",
+            data: response,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        const message = error instanceof Error
+            ? error.message
+            : "Failed to update donor response status";
         return res.status(400).json({
             success: false,
             message,

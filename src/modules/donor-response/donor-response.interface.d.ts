@@ -7,4 +7,7 @@ export interface UpdateDonorResponseInput {
     status: DonorResponseStatus;
     message?: string;
 }
+export interface UpdateDonorResponseStatusInput {
+    status: DonorResponseStatus;
+}
 //# sourceMappingURL=donor-response.interface.d.ts.map

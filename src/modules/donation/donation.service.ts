@@ -55,3 +55,32 @@ const donation = await prisma.donation.create({
 
   return donation;
 };
+
+// Get all donations for a specific donor
+export const getMyDonations = async (donorId: string) => {
+  const donations = await prisma.donation.findMany({
+    where: {
+      donorId,
+    },
+    include: {
+      bloodRequest: {
+        select: {
+          id: true,
+          bloodGroup: true,
+          units: true,
+          hospitalName: true,
+          hospitalAddress: true,
+          city: true,
+          requiredDate: true,
+          urgency: true,
+          status: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return donations;
+};
