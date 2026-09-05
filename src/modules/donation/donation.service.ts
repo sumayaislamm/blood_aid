@@ -1,3 +1,4 @@
+import type { DonationStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import type { CreateDonationInput } from "./donation.interface";
 
@@ -122,4 +123,38 @@ export const getDonationById = async (
   }
 
   return donation;
+};
+
+export const updateDonationStatus = async (
+  userId: string,
+  donationId: string,
+  status: DonationStatus
+) => {
+  const donation = await prisma.donation.findUnique({
+    where: {
+      id: donationId,
+    },
+  });
+
+  if (!donation) {
+    throw new Error("Donation not found");
+  }
+
+  if (donation.donorId !== userId) {
+    throw new Error("You can only update your own donation");
+  }
+
+  const updatedDonation = await prisma.donation.update({
+    where: {
+      id: donationId,
+    },
+    data: {
+      status,
+      ...(status === "VERIFIED" && {
+        verifiedAt: new Date(),
+      }),
+    },
+  });
+
+  return updatedDonation;
 };

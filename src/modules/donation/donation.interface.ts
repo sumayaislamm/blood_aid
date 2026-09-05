@@ -6,3 +6,7 @@ export interface CreateDonationInput {
   status?: DonationStatus;
   notes?: string;
 }
+
+export interface UpdateDonationStatusInput {
+  status: DonationStatus;
+}

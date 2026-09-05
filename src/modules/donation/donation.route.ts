@@ -3,7 +3,7 @@ import {
   authenticate,
   authorize,
 } from "../../middlewares/auth.middleware";
-import { createDonationController, getDonationByIdController, getMyDonationsController } from "./donation.controller";
+import { createDonationController, getDonationByIdController, getMyDonationsController, updateDonationStatusController } from "./donation.controller";
 import { createDonationSchema } from "./donation.validation";
 import { validate } from "../../middlewares/validation.middleware";
 
@@ -23,6 +23,12 @@ router.get(
   getMyDonationsController
 );
 
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorize("DONOR"),
+  updateDonationStatusController
+);
 router.get(
   "/:id",
   authenticate,

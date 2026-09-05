@@ -1,10 +1,11 @@
+import type { DonationStatus } from "../../../generated/prisma/enums";
 import type { CreateDonationInput } from "./donation.interface";
 export declare const createDonation: (donorId: string, responseId: string, data: CreateDonationInput) => Promise<{
     id: string;
     bloodRequestId: string;
     donorId: string;
     responseId: string;
-    status: import("../../../generated/prisma/enums").DonationStatus;
+    status: DonationStatus;
     donationDate: Date;
     units: number;
     verifiedAt: Date | null;
@@ -29,7 +30,7 @@ export declare const getMyDonations: (donorId: string) => Promise<({
     bloodRequestId: string;
     donorId: string;
     responseId: string;
-    status: import("../../../generated/prisma/enums").DonationStatus;
+    status: DonationStatus;
     donationDate: Date;
     units: number;
     verifiedAt: Date | null;
@@ -76,7 +77,20 @@ export declare const getDonationById: (userId: string, donationId: string) => Pr
     bloodRequestId: string;
     donorId: string;
     responseId: string;
-    status: import("../../../generated/prisma/enums").DonationStatus;
+    status: DonationStatus;
+    donationDate: Date;
+    units: number;
+    verifiedAt: Date | null;
+    notes: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare const updateDonationStatus: (userId: string, donationId: string, status: DonationStatus) => Promise<{
+    id: string;
+    bloodRequestId: string;
+    donorId: string;
+    responseId: string;
+    status: DonationStatus;
     donationDate: Date;
     units: number;
     verifiedAt: Date | null;

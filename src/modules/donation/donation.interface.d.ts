@@ -5,4 +5,7 @@ export interface CreateDonationInput {
     status?: DonationStatus;
     notes?: string;
 }
+export interface UpdateDonationStatusInput {
+    status: DonationStatus;
+}
 //# sourceMappingURL=donation.interface.d.ts.map

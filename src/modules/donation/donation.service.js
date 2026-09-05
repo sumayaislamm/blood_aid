@@ -96,4 +96,29 @@ export const getDonationById = async (userId, donationId) => {
     }
     return donation;
 };
+export const updateDonationStatus = async (userId, donationId, status) => {
+    const donation = await prisma.donation.findUnique({
+        where: {
+            id: donationId,
+        },
+    });
+    if (!donation) {
+        throw new Error("Donation not found");
+    }
+    if (donation.donorId !== userId) {
+        throw new Error("You can only update your own donation");
+    }
+    const updatedDonation = await prisma.donation.update({
+        where: {
+            id: donationId,
+        },
+        data: {
+            status,
+            ...(status === "VERIFIED" && {
+                verifiedAt: new Date(),
+            }),
+        },
+    });
+    return updatedDonation;
+};
 //# sourceMappingURL=donation.service.js.map
