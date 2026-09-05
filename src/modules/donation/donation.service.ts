@@ -39,17 +39,19 @@ export const createDonation = async (
     throw new Error("Donation already exists for this response");
   }
 
-  const donation = await prisma.donation.create({
-    data: {
-      bloodRequestId: response.bloodRequestId,
-      donorId,
-      responseId,
-      donationDate: new Date(data.donationDate),
-      units: data.units,
-      status: data.status ?? "PENDING",
+const donation = await prisma.donation.create({
+  data: {
+    bloodRequestId: response.bloodRequestId,
+    donorId,
+    responseId,
+    donationDate: new Date(data.donationDate),
+    units: data.units,
+    status: data.status ?? "PENDING",
+    ...(data.notes !== undefined && {
       notes: data.notes,
-    },
-  });
+    }),
+  },
+});
 
   return donation;
 };
