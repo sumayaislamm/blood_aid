@@ -24,13 +24,14 @@ export const createRequest = async (req, res) => {
     }
 };
 //Fetches all blood requests from the database
-export const getAllRequests = async (_req, res) => {
+export const getAllRequests = async (req, res) => {
     try {
-        const requests = await getAllBloodRequests();
+        const requests = await getAllBloodRequests(req.query);
         return res.status(200).json({
             success: true,
             message: "Blood requests fetched successfully",
-            data: requests,
+            data: requests.requests,
+            pagination: requests.pagination,
         });
     }
     catch (error) {

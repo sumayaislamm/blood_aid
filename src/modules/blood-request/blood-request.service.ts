@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import type { CreateBloodRequestInput, UpdateBloodRequestInput } from "./blood-request.interface";
+import type { CreateBloodRequestInput, GetBloodRequestsQuery, UpdateBloodRequestInput } from "./blood-request.interface";
 
 
 //Creates a new blood request in the database
@@ -28,17 +28,77 @@ export const createBloodRequest = async (
 
 //Fetches all blood requests from the database
 
-export const getAllBloodRequests = async () => {
-  const requests = await prisma.bloodRequest.findMany({
-    where: {
-      deletedAt: null,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export const getAllBloodRequests = async (
+  query: GetBloodRequestsQuery
+) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(
+    Math.max(Number(query.limit) || 10, 1),
+    100
+  );
 
-  return requests;
+  const skip = (page - 1) * limit;
+
+  const where: any = {
+    deletedAt: null,
+  };
+
+  if (query.bloodGroup) {
+    where.bloodGroup = query.bloodGroup;
+  }
+
+  if (query.urgency) {
+    where.urgency = query.urgency;
+  }
+
+  if (query.status) {
+    where.status = query.status;
+  }
+
+  if (query.city) {
+    where.city = {
+      contains: query.city,
+      mode: "insensitive",
+    };
+  }
+
+  const allowedSortFields = [
+    "createdAt",
+    "requiredDate",
+    "units",
+  ];
+
+  const sortBy = allowedSortFields.includes(query.sortBy || "")
+    ? query.sortBy!
+    : "createdAt";
+
+  const sortOrder =
+    query.sortOrder === "asc" ? "asc" : "desc";
+
+  const [requests, total] = await Promise.all([
+    prisma.bloodRequest.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+    }),
+
+    prisma.bloodRequest.count({
+      where,
+    }),
+  ]);
+
+  return {
+    requests,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 //Fetches a blood request by its ID from the database

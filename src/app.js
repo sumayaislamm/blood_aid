@@ -4,6 +4,7 @@ import bloodRequestRoutes from "./modules/blood-request/blood-request.route";
 import donorProfileRoutes from "./modules/donor-profile/donor-profile.route";
 import donorResponseRoutes from "./modules/donor-response/donor-response.route";
 import donationRoutes from "./modules/donation/donation.route";
+import { errorHandler } from "./middlewares/error.middleware";
 const app = express();
 app.use(express.json());
 app.get("/", (_req, res) => {
@@ -22,6 +23,8 @@ app.use("/api/donor-profile", donorProfileRoutes);
 app.use("/api/donor-responses", donorResponseRoutes);
 //donation routes
 app.use("/api/donations", donationRoutes);
+//error handler middleware
+app.use(errorHandler);
 //route not found handler
 app.use((_req, res) => {
     res.status(404).json({

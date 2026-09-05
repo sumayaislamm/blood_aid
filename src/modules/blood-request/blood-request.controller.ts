@@ -8,6 +8,7 @@ import {
   getBloodRequestResponses,
   updateBloodRequest,
 } from "./blood-request.service";
+import type { GetBloodRequestsQuery } from "./blood-request.interface";
 
 
 
@@ -46,16 +47,19 @@ export const createRequest = async (
 
 //Fetches all blood requests from the database
 export const getAllRequests = async (
-  _req: AuthenticatedRequest,
+  req: AuthenticatedRequest,
   res: Response
 ) => {
   try {
-    const requests = await getAllBloodRequests();
+    const requests = await getAllBloodRequests(
+      req.query as GetBloodRequestsQuery
+    );
 
     return res.status(200).json({
       success: true,
       message: "Blood requests fetched successfully",
-      data: requests,
+      data: requests.requests,
+      pagination: requests.pagination,
     });
   } catch (error) {
     console.error(error);

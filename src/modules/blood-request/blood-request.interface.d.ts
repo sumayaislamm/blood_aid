@@ -21,4 +21,14 @@ export interface UpdateBloodRequestInput {
     isPriority?: boolean;
     description?: string | null;
 }
+export interface GetBloodRequestsQuery {
+    page?: string;
+    limit?: string;
+    bloodGroup?: string;
+    urgency?: string;
+    status?: string;
+    city?: string;
+    sortBy?: string;
+    sortOrder?: string;
+}
 //# sourceMappingURL=blood-request.interface.d.ts.map

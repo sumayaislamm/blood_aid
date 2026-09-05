@@ -18,16 +18,59 @@ export const createBloodRequest = async (requesterId, data) => {
     return bloodRequest;
 };
 //Fetches all blood requests from the database
-export const getAllBloodRequests = async () => {
-    const requests = await prisma.bloodRequest.findMany({
-        where: {
-            deletedAt: null,
+export const getAllBloodRequests = async (query) => {
+    const page = Math.max(Number(query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
+    const skip = (page - 1) * limit;
+    const where = {
+        deletedAt: null,
+    };
+    if (query.bloodGroup) {
+        where.bloodGroup = query.bloodGroup;
+    }
+    if (query.urgency) {
+        where.urgency = query.urgency;
+    }
+    if (query.status) {
+        where.status = query.status;
+    }
+    if (query.city) {
+        where.city = {
+            contains: query.city,
+            mode: "insensitive",
+        };
+    }
+    const allowedSortFields = [
+        "createdAt",
+        "requiredDate",
+        "units",
+    ];
+    const sortBy = allowedSortFields.includes(query.sortBy || "")
+        ? query.sortBy
+        : "createdAt";
+    const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
+    const [requests, total] = await Promise.all([
+        prisma.bloodRequest.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy: {
+                [sortBy]: sortOrder,
+            },
+        }),
+        prisma.bloodRequest.count({
+            where,
+        }),
+    ]);
+    return {
+        requests,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
         },
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
-    return requests;
+    };
 };
 //Fetches a blood request by its ID from the database
 export const getBloodRequestById = async (id) => {
