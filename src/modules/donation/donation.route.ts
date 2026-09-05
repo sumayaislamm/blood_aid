@@ -4,6 +4,8 @@ import {
   authorize,
 } from "../../middlewares/auth.middleware";
 import { createDonationController, getDonationByIdController, getMyDonationsController } from "./donation.controller";
+import { createDonationSchema } from "./donation.validation";
+import { validate } from "../../middlewares/validation.middleware";
 
 const router = Router();
 
@@ -11,6 +13,7 @@ router.post(
   "/response/:responseId",
   authenticate,
   authorize("DONOR"),
+  validate(createDonationSchema),
   createDonationController
 );
 router.get(
