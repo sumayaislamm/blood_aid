@@ -84,4 +84,34 @@ export declare const deleteBloodRequest: (id: string, requesterId: string) => Pr
     createdAt: Date;
     updatedAt: Date;
 } | null>;
+export declare const getBloodRequestResponses: (requesterId: string, bloodRequestId: string) => Promise<({
+    donor: {
+        donorProfile: {
+            id: string;
+            userId: string;
+            bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
+            dateOfBirth: Date;
+            gender: import("../../../generated/prisma/enums").Gender;
+            city: string;
+            area: string;
+            lastDonationDate: Date | null;
+            isAvailable: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        } | null;
+        email: string;
+        id: string;
+        name: string;
+        phone: string | null;
+    };
+} & {
+    id: string;
+    bloodRequestId: string;
+    donorId: string;
+    status: import("../../../generated/prisma/enums").DonorResponseStatus;
+    message: string | null;
+    respondedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+})[]>;
 //# sourceMappingURL=blood-request.service.d.ts.map

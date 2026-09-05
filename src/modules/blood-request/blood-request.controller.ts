@@ -5,6 +5,7 @@ import {
   deleteBloodRequest,
   getAllBloodRequests,
   getBloodRequestById,
+  getBloodRequestResponses,
   updateBloodRequest,
 } from "./blood-request.service";
 
@@ -180,6 +181,44 @@ export const deleteRequest = async (
     return res.status(500).json({
       success: false,
       message: "Failed to delete blood request",
+    });
+  }
+};
+
+// Fetches all donor responses for a specific blood request
+export const getRequestResponses = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const responses = await getBloodRequestResponses(
+      req.user.userId,
+      req.params.id as string
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Blood request responses fetched successfully",
+      data: responses,
+    });
+  } catch (error) {
+    console.error(error);
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch blood request responses";
+
+    return res.status(400).json({
+      success: false,
+      message,
     });
   }
 };

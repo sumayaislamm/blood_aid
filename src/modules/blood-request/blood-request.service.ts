@@ -139,3 +139,48 @@ export const deleteBloodRequest = async (
 
   return deletedRequest;
 };
+
+
+// Fetches all donor responses for a specific blood request
+export const getBloodRequestResponses = async (
+  requesterId: string,
+  bloodRequestId: string
+) => {
+  const bloodRequest = await prisma.bloodRequest.findUnique({
+    where: {
+      id: bloodRequestId,
+    },
+  });
+
+  if (!bloodRequest) {
+    throw new Error("Blood request not found");
+  }
+
+  if (bloodRequest.requesterId !== requesterId) {
+    throw new Error(
+      "You can only view responses to your own blood requests"
+    );
+  }
+
+  const responses = await prisma.donorResponse.findMany({
+    where: {
+      bloodRequestId,
+    },
+    include: {
+      donor: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          donorProfile: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return responses;
+};

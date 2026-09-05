@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../../middlewares/auth.middleware";
-import { createRequest, deleteRequest, getAllRequests, getRequestById, updateRequest } from "./blood-request.controller";
+import { createRequest, deleteRequest, getAllRequests, getRequestById, getRequestResponses, updateRequest } from "./blood-request.controller";
 
 const router = Router();
 
@@ -14,6 +14,12 @@ router.get(
   "/",
   authenticate,
   getAllRequests
+);
+router.get(
+  "/:id/responses",
+  authenticate,
+  authorize("REQUESTER"),
+  getRequestResponses
 );
 router.get(
   "/:id",
@@ -32,5 +38,6 @@ router.delete(
   authorize("REQUESTER"),
   deleteRequest
 );
+
 
 export default router;
