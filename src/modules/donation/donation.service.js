@@ -40,4 +40,57 @@ export const createDonation = async (donorId, responseId, data) => {
     });
     return donation;
 };
+// Get all donations for a specific donor
+export const getMyDonations = async (donorId) => {
+    const donations = await prisma.donation.findMany({
+        where: {
+            donorId,
+        },
+        include: {
+            bloodRequest: {
+                select: {
+                    id: true,
+                    bloodGroup: true,
+                    units: true,
+                    hospitalName: true,
+                    hospitalAddress: true,
+                    city: true,
+                    requiredDate: true,
+                    urgency: true,
+                    status: true,
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+    return donations;
+};
+export const getDonationById = async (userId, donationId) => {
+    const donation = await prisma.donation.findUnique({
+        where: {
+            id: donationId,
+        },
+        include: {
+            bloodRequest: true,
+            donor: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                },
+            },
+            response: true,
+        },
+    });
+    if (!donation) {
+        throw new Error("Donation not found");
+    }
+    if (donation.donorId !== userId) {
+        throw new Error("You can only view your own donation");
+    }
+    return donation;
+};
 //# sourceMappingURL=donation.service.js.map
