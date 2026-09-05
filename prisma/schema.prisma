@@ -88,169 +88,182 @@ enum NotificationType {
   SYSTEM
 }
 
-
 model User {
-  id                 String           @id @default(uuid())
-  name               String           @db.VarChar(255)
-  email              String           @unique
-  password           String
-  phone              String?
-  role               UserRole
-  status             UserStatus       @default(ACTIVE)
+  id       String     @id @default(uuid())
+  name     String     @db.VarChar(255)
+  email    String     @unique
+  password String
+  phone    String?
+  role     UserRole
+  status   UserStatus @default(ACTIVE)
 
-  donorProfile       DonorProfile?
-  bloodRequests      BloodRequest[]
-  donorResponses     DonorResponse[]
-  donationsAsDonor   Donation[]       @relation("DonorDonations")
-  notifications      Notification[]
-  auditLogs          AuditLog[]
-  payments           Payment[]         @relation("RequesterPayments")
+  donorProfile     DonorProfile?
+  bloodRequests    BloodRequest[]
+  donorResponses   DonorResponse[]
+  donationsAsDonor Donation[]      @relation("DonorDonations")
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  payments         Payment[]       @relation("RequesterPayments")
 
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  deletedAt          DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@map("user")
 }
 
 model DonorProfile {
-  id                String       @id @default(uuid())
-  userId            String       @unique
-  bloodGroup        BloodGroup
-  dateOfBirth       DateTime
-  gender            Gender
-  city              String
-  area              String
-  lastDonationDate  DateTime?
-  isAvailable       Boolean      @default(true)
+  id               String     @id @default(uuid())
+  userId           String     @unique
+  bloodGroup       BloodGroup
+  dateOfBirth      DateTime
+  gender           Gender
+  city             String
+  area             String
+  lastDonationDate DateTime?
+  isAvailable      Boolean    @default(true)
 
-  user              User         @relation(fields: [userId],references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([bloodGroup])
+  @@index([city])
+  @@index([isAvailable])
   @@map("donor_profile")
 }
 
 model BloodRequest {
-  id              String              @id @default(uuid())
+  id              String             @id @default(uuid())
   requesterId     String
   bloodGroup      BloodGroup
-  units            Int
+  units           Int
   hospitalName    String
   hospitalAddress String
   city            String
   requiredDate    DateTime
   urgency         Urgency
-  status          BloodRequestStatus   @default(PENDING)
-  isPriority      Boolean              @default(false)
+  status          BloodRequestStatus @default(PENDING)
+  isPriority      Boolean            @default(false)
   description     String?
   deletedAt       DateTime?
 
-  requester       User                 @relation( fields: [requesterId], references: [id])
+  requester User @relation(fields: [requesterId], references: [id])
 
-  responses       DonorResponse[]
-  donations       Donation[]
-  payments        Payment[]
+  responses DonorResponse[]
+  donations Donation[]
+  payments  Payment[]
 
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([requesterId])
+  @@index([bloodGroup])
+  @@index([city])
+  @@index([status])
+  @@index([urgency])
+  @@index([requiredDate])
   @@map("blood_request")
 }
 
 model DonorResponse {
-  id              String               @id @default(uuid())
-  bloodRequestId  String
-  donorId         String
-  status          DonorResponseStatus  @default(PENDING)
-  message         String?
-  respondedAt     DateTime?
+  id             String              @id @default(uuid())
+  bloodRequestId String
+  donorId        String
+  status         DonorResponseStatus @default(PENDING)
+  message        String?
+  respondedAt    DateTime?
 
-  bloodRequest    BloodRequest         @relation(fields: [bloodRequestId],references: [id])
+  bloodRequest BloodRequest @relation(fields: [bloodRequestId], references: [id])
 
-  donor           User                 @relation(fields: [donorId],references: [id])
+  donor User @relation(fields: [donorId], references: [id])
 
-  donation        Donation?
+  donation Donation?
 
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([bloodRequestId, donorId])
+  @@index([status])
   @@map("donor_response")
 }
 
 model Donation {
-  id              String          @id @default(uuid())
-  bloodRequestId  String
-  donorId         String
-  responseId      String          @unique
-  status          DonationStatus
-  donationDate    DateTime
-  units           Int
-  verifiedAt      DateTime?
-  notes           String?
+  id             String         @id @default(uuid())
+  bloodRequestId String
+  donorId        String
+  responseId     String         @unique
+  status         DonationStatus
+  donationDate   DateTime
+  units          Int
+  verifiedAt     DateTime?
+  notes          String?
 
-  bloodRequest    BloodRequest    @relation(fields: [bloodRequestId],references: [id])
+  bloodRequest BloodRequest @relation(fields: [bloodRequestId], references: [id])
 
-  donor           User            @relation("DonorDonations",fields: [donorId],references: [id])
+  donor User @relation("DonorDonations", fields: [donorId], references: [id])
 
-  response        DonorResponse   @relation(fields: [responseId],references: [id])
+  response DonorResponse @relation(fields: [responseId], references: [id])
 
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([bloodRequestId])
+  @@index([donorId])
+  @@index([status])
+  @@index([donationDate])
   @@map("donation")
 }
 
 model Payment {
-  id              String           @id @default(uuid())
-  requesterId     String
-  bloodRequestId  String
-  amount          Decimal
-  currency        String
-  provider        PaymentProvider
-  transactionId   String?
-  status          PaymentStatus
-  paidAt          DateTime?
+  id             String          @id @default(uuid())
+  requesterId    String
+  bloodRequestId String
+  amount         Decimal
+  currency       String
+  provider       PaymentProvider
+  transactionId  String?
+  status         PaymentStatus
+  paidAt         DateTime?
 
-  requester       User             @relation("RequesterPayments",fields: [requesterId],references: [id])
+  requester User @relation("RequesterPayments", fields: [requesterId], references: [id])
 
-  bloodRequest    BloodRequest     @relation(fields: [bloodRequestId],references: [id])
+  bloodRequest BloodRequest @relation(fields: [bloodRequestId], references: [id])
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("payment")
 }
 
 model Notification {
-  id          String            @id @default(uuid())
-  userId      String
-  title       String
-  message     String
-  type        NotificationType
-  isRead      Boolean           @default(false)
+  id      String           @id @default(uuid())
+  userId  String
+  title   String
+  message String
+  type    NotificationType
+  isRead  Boolean          @default(false)
 
-  user        User              @relation(fields: [userId],references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt   DateTime          @default(now())
+  createdAt DateTime @default(now())
 
   @@map("notification")
 }
 
 model AuditLog {
-  id          String    @id @default(uuid())
-  userId      String
-  action      String
-  entity      String
-  entityId    String
-  details     Json?
-  ipAddress   String?
+  id        String  @id @default(uuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  details   Json?
+  ipAddress String?
 
-  user        User      @relation(fields: [userId],references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@map("audit_log")
 }
