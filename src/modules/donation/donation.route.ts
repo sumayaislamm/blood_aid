@@ -3,7 +3,7 @@ import {
   authenticate,
   authorize,
 } from "../../middlewares/auth.middleware";
-import { createDonationController, getMyDonationsController } from "./donation.controller";
+import { createDonationController, getDonationByIdController, getMyDonationsController } from "./donation.controller";
 
 const router = Router();
 
@@ -18,5 +18,12 @@ router.get(
   authenticate,
   authorize("DONOR"),
   getMyDonationsController
+);
+
+router.get(
+  "/:id",
+  authenticate,
+  authorize("DONOR"),
+  getDonationByIdController
 );
 export default router;

@@ -84,3 +84,36 @@ export const getMyDonations = async (donorId: string) => {
 
   return donations;
 };
+
+export const getDonationById = async (
+  userId: string,
+  donationId: string
+) => {
+  const donation = await prisma.donation.findUnique({
+    where: {
+      id: donationId,
+    },
+    include: {
+      bloodRequest: true,
+      donor: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+      response: true,
+    },
+  });
+
+  if (!donation) {
+    throw new Error("Donation not found");
+  }
+
+  if (donation.donorId !== userId) {
+    throw new Error("You can only view your own donation");
+  }
+
+  return donation;
+};
