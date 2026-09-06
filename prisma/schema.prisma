@@ -71,7 +71,7 @@ enum DonationStatus {
 
 enum PaymentProvider {
   STRIPE
-  SSLCOMMERZ
+  BKASH
 }
 
 enum PaymentStatus {
@@ -139,6 +139,7 @@ model BloodRequest {
   requesterId     String
   bloodGroup      BloodGroup
   units           Int
+  amount          Decimal            @default(0) @db.Decimal(10, 2)
   hospitalName    String
   hospitalAddress String
   city            String

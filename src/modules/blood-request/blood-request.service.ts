@@ -13,6 +13,7 @@ export const createBloodRequest = async (
       requesterId,
       bloodGroup: data.bloodGroup,
       units: data.units,
+      amount: data.amount,
       hospitalName: data.hospitalName,
       hospitalAddress: data.hospitalAddress,
       city: data.city,
@@ -143,6 +144,9 @@ export const updateBloodRequest = async (
       ...(data.units !== undefined && {
         units: data.units,
       }),
+      ...(data.amount !== undefined && {
+  amount: data.amount,
+}),
       ...(data.hospitalName !== undefined && {
         hospitalName: data.hospitalName,
       }),

@@ -11,6 +11,7 @@ export interface CreateBloodRequestInput {
     | "O_POSITIVE"
     | "O_NEGATIVE";
   units: number;
+  amount: number;
   hospitalName: string;
   hospitalAddress: string;
   city: string;
@@ -23,6 +24,7 @@ export interface CreateBloodRequestInput {
 export interface UpdateBloodRequestInput {
   bloodGroup?: BloodGroup;
   units?: number;
+  amount?: number;
   hospitalName?: string;
   hospitalAddress?: string;
   city?: string;
