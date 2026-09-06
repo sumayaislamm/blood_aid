@@ -1,50 +1,56 @@
-import type { Request, Response } from "express";
-import { loginUser, registerUser, updateUser } from "./auth.service";
+import type { Request, Response, NextFunction } from "express";
+import {
+  loginUser,
+  registerUser,
+  updateUser,
+} from "./auth.service";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import { prisma } from "../../lib/prisma";
 
-export const register = async (req: Request, res: Response) => {
+// Register
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = await registerUser(req.body);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "User registered successfully",
       data: user,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Registration failed";
-
-    res.status(400).json({
-      success: false,
-      message,
-    });
+    next(error);
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+// Login
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const result = await loginUser(req.body);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       data: result,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Login failed";
-
-    res.status(401).json({
-      success: false,
-      message,
-    });
+    next(error);
   }
 };
 
-//GET ME
-
-export const getMe = async (req: AuthenticatedRequest, res: Response) => {
+// Get Me
+export const getMe = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -76,23 +82,22 @@ export const getMe = async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "User profile fetched successfully",
       data: user,
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch user profile",
-    });
+    next(error);
   }
 };
 
-//Update User Profile
-export const updateMe = async (req: AuthenticatedRequest, res: Response) => {
+// Update User Profile
+export const updateMe = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -103,17 +108,13 @@ export const updateMe = async (req: AuthenticatedRequest, res: Response) => {
 
     const user = await updateUser(req.user.userId, req.body);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "User profile updated successfully",
       data: user,
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to update user profile",
-    });
+    next(error);
   }
 };
+

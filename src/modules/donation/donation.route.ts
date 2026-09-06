@@ -4,7 +4,7 @@ import {
   authorize,
 } from "../../middlewares/auth.middleware";
 import { createDonationController, getDonationByIdController, getMyDonationsController, updateDonationStatusController } from "./donation.controller";
-import { createDonationSchema } from "./donation.validation";
+import { createDonationSchema, updateDonationStatusSchema } from "./donation.validation";
 import { validate } from "../../middlewares/validation.middleware";
 
 const router = Router();
@@ -27,6 +27,7 @@ router.patch(
   "/:id/status",
   authenticate,
   authorize("DONOR"),
+  validate(updateDonationStatusSchema),
   updateDonationStatusController
 );
 router.get(

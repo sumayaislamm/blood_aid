@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
   createDonorResponse,
@@ -9,7 +9,8 @@ import {
 
 export const createResponse = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.user) {
@@ -30,24 +31,15 @@ export const createResponse = async (
       data: response,
     });
   } catch (error) {
-    console.error(error);
-
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to create donor response";
-
-    return res.status(400).json({
-      success: false,
-      message,
-    });
+    next(error);
   }
 };
 
 // Get my donor responses for the authenticated donor
 export const getMyResponses = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.user) {
@@ -65,20 +57,15 @@ export const getMyResponses = async (
       data: responses,
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch donor responses",
-    });
+    next(error);
   }
 };
-
 
 // Update my donor response for the authenticated donor
 export const updateMyResponse = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.user) {
@@ -100,24 +87,15 @@ export const updateMyResponse = async (
       data: response,
     });
   } catch (error) {
-    console.error(error);
-
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to update donor response";
-
-    return res.status(400).json({
-      success: false,
-      message,
-    });
+    next(error);
   }
 };
 
 // Update donor response status for the authenticated donor
 export const updateResponseStatus = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.user) {
@@ -139,16 +117,6 @@ export const updateResponseStatus = async (
       data: response,
     });
   } catch (error) {
-    console.error(error);
-
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to update donor response status";
-
-    return res.status(400).json({
-      success: false,
-      message,
-    });
+    next(error);
   }
 };
