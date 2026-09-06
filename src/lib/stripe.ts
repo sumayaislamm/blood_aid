@@ -8,6 +8,6 @@ if (!secretKey) {
 
 export const stripe = new Stripe(secretKey);
 
-stripe.accounts.retrieve(null).then((account) => {
-  console.log("APP STRIPE ACCOUNT:", account.id);
-});
+// stripe.accounts.retrieve(null).then((account) => {
+//   console.log("APP STRIPE ACCOUNT:", account.id);
+// });
