@@ -1,3 +1,4 @@
+
 import type { Request, Response, NextFunction } from "express";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import Stripe from "stripe";
@@ -34,7 +35,7 @@ export const initiatePayment = async (
   }
 };
 
-export const handleStripeWebhook = async(
+export const handleStripeWebhook = async (
   req: Request,
   res: Response
 ) => {
@@ -65,7 +66,10 @@ export const handleStripeWebhook = async(
       webhookSecret
     );
   } catch (error) {
-    console.error("Stripe webhook signature verification failed:", error);
+    console.error(
+      "Stripe webhook signature verification failed:",
+      error
+    );
 
     return res.status(400).json({
       success: false,
@@ -76,6 +80,14 @@ export const handleStripeWebhook = async(
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // Payment must actually be paid before updating the database
+      if (session.payment_status !== "paid") {
+        return res.status(200).json({
+          success: true,
+          received: true,
+        });
+      }
 
       const paymentId = session.metadata?.paymentId;
 
@@ -99,6 +111,7 @@ export const handleStripeWebhook = async(
         });
       }
 
+      // Idempotency: do not update an already-paid payment again
       if (payment.status !== PaymentStatus.PAID) {
         await prisma.payment.update({
           where: {
@@ -118,11 +131,64 @@ export const handleStripeWebhook = async(
       received: true,
     });
   } catch (error) {
-    console.error("Stripe webhook processing failed:", error);
+    console.error(
+      "Stripe webhook processing failed:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
       message: "Webhook processing failed",
     });
+  }
+};
+
+export const getPaymentById = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: {
+        id: String(req.params.id),
+        requesterId: req.user.userId,
+      },
+      include: {
+        bloodRequest: {
+          select: {
+            id: true,
+            bloodGroup: true,
+            units: true,
+            amount: true,
+            hospitalName: true,
+            city: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: "Payment not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment retrieved successfully",
+      data: payment,
+    });
+  } catch (error) {
+    next(error);
   }
 };
