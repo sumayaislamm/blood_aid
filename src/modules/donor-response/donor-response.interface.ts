@@ -13,3 +13,9 @@ export interface UpdateDonorResponseInput {
 export interface UpdateDonorResponseStatusInput {
   status: DonorResponseStatus;
 }
+export interface GetMyDonorResponsesQuery {
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}

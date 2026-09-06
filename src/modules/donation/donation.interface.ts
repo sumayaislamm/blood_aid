@@ -10,3 +10,10 @@ export interface CreateDonationInput {
 export interface UpdateDonationStatusInput {
   status: DonationStatus;
 }
+
+export interface GetMyDonationsQuery {
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}

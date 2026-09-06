@@ -6,11 +6,12 @@ import {
   updateDonorResponseStatus,
   updateMyDonorResponse,
 } from "./donor-response.service";
+import type { GetMyDonorResponsesQuery } from "./donor-response.interface";
 
 export const createResponse = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -20,10 +21,7 @@ export const createResponse = async (
       });
     }
 
-    const response = await createDonorResponse(
-      req.user.userId,
-      req.body
-    );
+    const response = await createDonorResponse(req.user.userId, req.body);
 
     return res.status(201).json({
       success: true,
@@ -39,7 +37,7 @@ export const createResponse = async (
 export const getMyResponses = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -49,12 +47,16 @@ export const getMyResponses = async (
       });
     }
 
-    const responses = await getMyDonorResponses(req.user.userId);
+    const result = await getMyDonorResponses(
+      req.user.userId,
+      req.query as GetMyDonorResponsesQuery,
+    );
 
     return res.status(200).json({
       success: true,
       message: "Donor responses fetched successfully",
-      data: responses,
+      data: result.responses,
+      pagination: result.pagination,
     });
   } catch (error) {
     next(error);
@@ -65,7 +67,7 @@ export const getMyResponses = async (
 export const updateMyResponse = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -78,7 +80,7 @@ export const updateMyResponse = async (
     const response = await updateMyDonorResponse(
       req.user.userId,
       req.params.id as string,
-      req.body
+      req.body,
     );
 
     return res.status(200).json({
@@ -95,7 +97,7 @@ export const updateMyResponse = async (
 export const updateResponseStatus = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -108,7 +110,7 @@ export const updateResponseStatus = async (
     const response = await updateDonorResponseStatus(
       req.user.userId,
       req.params.id as string,
-      req.body
+      req.body,
     );
 
     return res.status(200).json({

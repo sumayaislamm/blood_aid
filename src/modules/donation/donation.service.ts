@@ -64,34 +64,82 @@ export const createDonation = async (
 };
 
 // Get all donations for a specific donor
-export const getMyDonations = async (donorId: string) => {
-  const donations = await prisma.donation.findMany({
-    where: {
-      donorId,
-    },
-    include: {
-      bloodRequest: {
-        select: {
-          id: true,
-          bloodGroup: true,
-          units: true,
-          hospitalName: true,
-          hospitalAddress: true,
-          city: true,
-          requiredDate: true,
-          urgency: true,
-          status: true,
+export const getMyDonations = async (
+  donorId: string,
+  query: {
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }
+) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
+
+  const allowedSortFields = [
+    "createdAt",
+    "updatedAt",
+    "donationDate",
+    "status",
+    "units",
+  ];
+
+  const sortBy = allowedSortFields.includes(query.sortBy || "")
+    ? query.sortBy!
+    : "createdAt";
+
+  const sortOrder =
+    query.sortOrder === "asc" ? "asc" : "desc";
+
+  const skip = (page - 1) * limit;
+
+  const [donations, total] = await Promise.all([
+    prisma.donation.findMany({
+      where: {
+        donorId,
+      },
+      include: {
+        bloodRequest: {
+          select: {
+            id: true,
+            bloodGroup: true,
+            units: true,
+            hospitalName: true,
+            hospitalAddress: true,
+            city: true,
+            requiredDate: true,
+            urgency: true,
+            status: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip,
+      take: limit,
+    }),
 
-  return donations;
+    prisma.donation.count({
+      where: {
+        donorId,
+      },
+    }),
+  ]);
+
+  return {
+    donations,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
+
+// Get a specific donation by ID for a specific donor
 export const getDonationById = async (
   userId: string,
   donationId: string

@@ -6,11 +6,12 @@ import {
   getMyDonations,
   updateDonationStatus,
 } from "./donation.service";
+import type { GetMyDonationsQuery } from "./donation.interface";
 
 export const createDonationController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -23,7 +24,7 @@ export const createDonationController = async (
     const donation = await createDonation(
       req.user.userId,
       req.params.responseId as string,
-      req.body
+      req.body,
     );
 
     return res.status(201).json({
@@ -40,7 +41,7 @@ export const createDonationController = async (
 export const getMyDonationsController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -50,12 +51,16 @@ export const getMyDonationsController = async (
       });
     }
 
-    const donations = await getMyDonations(req.user.userId);
+    const result = await getMyDonations(
+      req.user.userId,
+      req.query as GetMyDonationsQuery,
+    );
 
     return res.status(200).json({
       success: true,
       message: "My donations fetched successfully",
-      data: donations,
+      data: result.donations,
+      pagination: result.pagination,
     });
   } catch (error) {
     next(error);
@@ -66,7 +71,7 @@ export const getMyDonationsController = async (
 export const getDonationByIdController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -78,7 +83,7 @@ export const getDonationByIdController = async (
 
     const donation = await getDonationById(
       req.user.userId,
-      req.params.id as string
+      req.params.id as string,
     );
 
     return res.status(200).json({
@@ -94,7 +99,7 @@ export const getDonationByIdController = async (
 export const updateDonationStatusController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -107,7 +112,7 @@ export const updateDonationStatusController = async (
     const donation = await updateDonationStatus(
       req.user.userId,
       req.params.id as string,
-      req.body.status
+      req.body.status,
     );
 
     return res.status(200).json({

@@ -5,6 +5,7 @@ import donorProfileRoutes from "./modules/donor-profile/donor-profile.route";
 import donorResponseRoutes from "./modules/donor-response/donor-response.route";
 import donationRoutes from "./modules/donation/donation.route";
 import { errorHandler } from "./middlewares/error.middleware";
+import { authRateLimiter } from "./middlewares/rate-limit.middleware";
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.get("/", (_req, res) => {
 
 //auth routes
 
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRateLimiter, authRoutes);
 
 //blood request routes
 

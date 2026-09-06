@@ -47,20 +47,65 @@ const response = await prisma.donorResponse.create({
 };
 
 // Get all donor responses for a specific donor
-export const getMyDonorResponses = async (donorId: string) => {
-  const responses = await prisma.donorResponse.findMany({
-    where: {
-      donorId,
-    },
-    include: {
-      bloodRequest: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export const getMyDonorResponses = async (
+  donorId: string,
+  query: {
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }
+) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
 
-  return responses;
+  const allowedSortFields = [
+    "createdAt",
+    "updatedAt",
+    "status",
+    "respondedAt",
+  ];
+
+  const sortBy = allowedSortFields.includes(query.sortBy || "")
+    ? query.sortBy!
+    : "createdAt";
+
+  const sortOrder =
+    query.sortOrder === "asc" ? "asc" : "desc";
+
+  const skip = (page - 1) * limit;
+
+  const [responses, total] = await Promise.all([
+    prisma.donorResponse.findMany({
+      where: {
+        donorId,
+      },
+      include: {
+        bloodRequest: true,
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip,
+      take: limit,
+    }),
+
+    prisma.donorResponse.count({
+      where: {
+        donorId,
+      },
+    }),
+  ]);
+
+  return {
+    responses,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 
