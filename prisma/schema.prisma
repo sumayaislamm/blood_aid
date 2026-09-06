@@ -97,6 +97,9 @@ model User {
   role     UserRole
   status   UserStatus @default(ACTIVE)
 
+  googleId String? @unique
+  avatar   String?
+
   donorProfile     DonorProfile?
   bloodRequests    BloodRequest[]
   donorResponses   DonorResponse[]
