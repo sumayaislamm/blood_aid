@@ -6,8 +6,15 @@ import donorResponseRoutes from "./modules/donor-response/donor-response.route";
 import donationRoutes from "./modules/donation/donation.route";
 import { errorHandler } from "./middlewares/error.middleware";
 import { authRateLimiter } from "./middlewares/rate-limit.middleware";
+import paymentRoutes from "./modules/payment/payment.route";
+import { handleStripeWebhook } from "./modules/payment/payment.controller";
 
 const app = express();
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook
+);
 
 app.use(express.json());
 
@@ -33,6 +40,8 @@ app.use("/api/donor-profile", donorProfileRoutes);
 app.use("/api/donor-responses", donorResponseRoutes);
 //donation routes
 app.use("/api/donations", donationRoutes);
+//payment routes
+app.use("/api/payments", paymentRoutes);
 
 //error handler middleware
 app.use(errorHandler);
