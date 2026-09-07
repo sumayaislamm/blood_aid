@@ -2,10 +2,16 @@ import rateLimit from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
 import redisClient from "../config/redis.js";
 
+const redisStore =
+  process.env.REDIS_URL
+    ? new RedisStore({
+        sendCommand: (...args: string[]) =>
+          redisClient.sendCommand(args),
+      })
+    : undefined;
+
 export const authRateLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
-  }),
+  ...(redisStore ? { store: redisStore } : {}),
   windowMs: 15 * 60 * 1000,
   limit: 10,
   standardHeaders: "draft-8",
