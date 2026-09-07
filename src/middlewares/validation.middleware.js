@@ -1,5 +1,8 @@
 export const validate = (schema) => (req, res, next) => {
-    const result = schema.safeParse(req.body);
+    const input = req.method === "GET" || req.method === "DELETE"
+        ? req.query
+        : req.body;
+    const result = schema.safeParse(input);
     if (!result.success) {
         return res.status(400).json({
             success: false,
@@ -10,7 +13,9 @@ export const validate = (schema) => (req, res, next) => {
             })),
         });
     }
-    req.body = result.data;
+    if (req.method !== "GET" && req.method !== "DELETE") {
+        req.body = result.data;
+    }
     next();
 };
 //# sourceMappingURL=validation.middleware.js.map

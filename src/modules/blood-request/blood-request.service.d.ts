@@ -4,6 +4,7 @@ export declare const createBloodRequest: (requesterId: string, data: CreateBlood
     requesterId: string;
     bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
     units: number;
+    amount: import("@prisma/client-runtime-utils").Decimal;
     hospitalName: string;
     hospitalAddress: string;
     city: string;
@@ -22,6 +23,7 @@ export declare const getAllBloodRequests: (query: GetBloodRequestsQuery) => Prom
         requesterId: string;
         bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
         units: number;
+        amount: import("@prisma/client-runtime-utils").Decimal;
         hospitalName: string;
         hospitalAddress: string;
         city: string;
@@ -46,6 +48,7 @@ export declare const getBloodRequestById: (id: string) => Promise<{
     requesterId: string;
     bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
     units: number;
+    amount: import("@prisma/client-runtime-utils").Decimal;
     hospitalName: string;
     hospitalAddress: string;
     city: string;
@@ -63,6 +66,7 @@ export declare const updateBloodRequest: (id: string, requesterId: string, data:
     requesterId: string;
     bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
     units: number;
+    amount: import("@prisma/client-runtime-utils").Decimal;
     hospitalName: string;
     hospitalAddress: string;
     city: string;
@@ -80,6 +84,7 @@ export declare const deleteBloodRequest: (id: string, requesterId: string) => Pr
     requesterId: string;
     bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
     units: number;
+    amount: import("@prisma/client-runtime-utils").Decimal;
     hospitalName: string;
     hospitalAddress: string;
     city: string;

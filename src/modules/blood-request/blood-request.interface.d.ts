@@ -2,6 +2,7 @@ import type { BloodGroup, Urgency } from "../../../generated/prisma/enums";
 export interface CreateBloodRequestInput {
     bloodGroup: "A_POSITIVE" | "A_NEGATIVE" | "B_POSITIVE" | "B_NEGATIVE" | "AB_POSITIVE" | "AB_NEGATIVE" | "O_POSITIVE" | "O_NEGATIVE";
     units: number;
+    amount: number;
     hospitalName: string;
     hospitalAddress: string;
     city: string;
@@ -13,6 +14,7 @@ export interface CreateBloodRequestInput {
 export interface UpdateBloodRequestInput {
     bloodGroup?: BloodGroup;
     units?: number;
+    amount?: number;
     hospitalName?: string;
     hospitalAddress?: string;
     city?: string;
@@ -24,6 +26,17 @@ export interface UpdateBloodRequestInput {
 export interface GetBloodRequestsQuery {
     page?: string;
     limit?: string;
+    bloodGroup?: string;
+    urgency?: string;
+    status?: string;
+    city?: string;
+    sortBy?: string;
+    sortOrder?: string;
+}
+export interface GetBloodRequestsQuery {
+    page?: string;
+    limit?: string;
+    search?: string;
     bloodGroup?: string;
     urgency?: string;
     status?: string;

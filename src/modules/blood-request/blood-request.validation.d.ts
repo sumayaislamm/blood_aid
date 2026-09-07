@@ -11,6 +11,7 @@ export declare const createBloodRequestSchema: z.ZodObject<{
         O_POSITIVE: "O_POSITIVE";
     }>;
     units: z.ZodNumber;
+    amount: z.ZodNumber;
     hospitalName: z.ZodString;
     hospitalAddress: z.ZodString;
     city: z.ZodString;
@@ -35,6 +36,7 @@ export declare const updateBloodRequestSchema: z.ZodObject<{
         O_POSITIVE: "O_POSITIVE";
     }>>;
     units: z.ZodOptional<z.ZodNumber>;
+    amount: z.ZodOptional<z.ZodNumber>;
     hospitalName: z.ZodOptional<z.ZodString>;
     hospitalAddress: z.ZodOptional<z.ZodString>;
     city: z.ZodOptional<z.ZodString>;

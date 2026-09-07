@@ -7,4 +7,12 @@ export const createDonationSchema = z.object({
         .optional(),
     notes: z.string().max(500).optional(),
 });
+export const updateDonationStatusSchema = z.object({
+    status: z.enum([
+        "PENDING",
+        "COMPLETED",
+        "VERIFIED",
+        "CANCELLED",
+    ]),
+});
 //# sourceMappingURL=donation.validation.js.map

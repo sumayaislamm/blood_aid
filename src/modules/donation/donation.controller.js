@@ -1,5 +1,5 @@
-import { createDonation, getDonationById, getMyDonations, updateDonationStatus } from "./donation.service";
-export const createDonationController = async (req, res) => {
+import { createDonation, getDonationById, getMyDonations, updateDonationStatus, } from "./donation.service";
+export const createDonationController = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -15,18 +15,11 @@ export const createDonationController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to create donation";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
 // Get my donations for the authenticated donor
-export const getMyDonationsController = async (req, res) => {
+export const getMyDonationsController = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -34,26 +27,20 @@ export const getMyDonationsController = async (req, res) => {
                 message: "Unauthorized",
             });
         }
-        const donations = await getMyDonations(req.user.userId);
+        const result = await getMyDonations(req.user.userId, req.query);
         return res.status(200).json({
             success: true,
             message: "My donations fetched successfully",
-            data: donations,
+            data: result.donations,
+            pagination: result.pagination,
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to fetch donations";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
 // Get donation by ID for the authenticated donor
-export const getDonationByIdController = async (req, res) => {
+export const getDonationByIdController = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -69,17 +56,10 @@ export const getDonationByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to fetch donation";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
-export const updateDonationStatusController = async (req, res) => {
+export const updateDonationStatusController = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -95,14 +75,7 @@ export const updateDonationStatusController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to update donation status";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
 //# sourceMappingURL=donation.controller.js.map

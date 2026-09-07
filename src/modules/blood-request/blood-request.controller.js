@@ -1,6 +1,6 @@
 import { createBloodRequest, deleteBloodRequest, getAllBloodRequests, getBloodRequestById, getBloodRequestResponses, updateBloodRequest, } from "./blood-request.service";
-//Creates a new blood request in the database
-export const createRequest = async (req, res) => {
+// Creates a new blood request in the database
+export const createRequest = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -16,15 +16,11 @@ export const createRequest = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to create blood request",
-        });
+        next(error);
     }
 };
-//Fetches all blood requests from the database
-export const getAllRequests = async (req, res) => {
+// Fetches all blood requests from the database
+export const getAllRequests = async (req, res, next) => {
     try {
         const requests = await getAllBloodRequests(req.query);
         return res.status(200).json({
@@ -35,14 +31,10 @@ export const getAllRequests = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch blood requests",
-        });
+        next(error);
     }
 };
-export const getRequestById = async (req, res) => {
+export const getRequestById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const request = await getBloodRequestById(id);
@@ -59,15 +51,11 @@ export const getRequestById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch blood request",
-        });
+        next(error);
     }
 };
-//Updates a blood request in the database
-export const updateRequest = async (req, res) => {
+// Updates a blood request in the database
+export const updateRequest = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -90,15 +78,11 @@ export const updateRequest = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to update blood request",
-        });
+        next(error);
     }
 };
-//Deletes a blood request from the database
-export const deleteRequest = async (req, res) => {
+// Deletes a blood request from the database
+export const deleteRequest = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -120,15 +104,11 @@ export const deleteRequest = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to delete blood request",
-        });
+        next(error);
     }
 };
 // Fetches all donor responses for a specific blood request
-export const getRequestResponses = async (req, res) => {
+export const getRequestResponses = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -144,14 +124,7 @@ export const getRequestResponses = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to fetch blood request responses";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
 //# sourceMappingURL=blood-request.controller.js.map

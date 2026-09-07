@@ -1,5 +1,5 @@
 import { createDonorResponse, getMyDonorResponses, updateDonorResponseStatus, updateMyDonorResponse, } from "./donor-response.service";
-export const createResponse = async (req, res) => {
+export const createResponse = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -15,18 +15,11 @@ export const createResponse = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to create donor response";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
 // Get my donor responses for the authenticated donor
-export const getMyResponses = async (req, res) => {
+export const getMyResponses = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -34,23 +27,20 @@ export const getMyResponses = async (req, res) => {
                 message: "Unauthorized",
             });
         }
-        const responses = await getMyDonorResponses(req.user.userId);
+        const result = await getMyDonorResponses(req.user.userId, req.query);
         return res.status(200).json({
             success: true,
             message: "Donor responses fetched successfully",
-            data: responses,
+            data: result.responses,
+            pagination: result.pagination,
         });
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch donor responses",
-        });
+        next(error);
     }
 };
 // Update my donor response for the authenticated donor
-export const updateMyResponse = async (req, res) => {
+export const updateMyResponse = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -66,18 +56,11 @@ export const updateMyResponse = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to update donor response";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
 // Update donor response status for the authenticated donor
-export const updateResponseStatus = async (req, res) => {
+export const updateResponseStatus = async (req, res, next) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -93,14 +76,7 @@ export const updateResponseStatus = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
-        const message = error instanceof Error
-            ? error.message
-            : "Failed to update donor response status";
-        return res.status(400).json({
-            success: false,
-            message,
-        });
+        next(error);
     }
 };
 //# sourceMappingURL=donor-response.controller.js.map

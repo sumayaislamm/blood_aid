@@ -13,37 +13,51 @@ export declare const createDonation: (donorId: string, responseId: string, data:
     createdAt: Date;
     updatedAt: Date;
 }>;
-export declare const getMyDonations: (donorId: string) => Promise<({
-    bloodRequest: {
-        bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
-        city: string;
-        hospitalAddress: string;
-        hospitalName: string;
+export declare const getMyDonations: (donorId: string, query: {
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: string;
+}) => Promise<{
+    donations: ({
+        bloodRequest: {
+            bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
+            city: string;
+            hospitalAddress: string;
+            hospitalName: string;
+            id: string;
+            requiredDate: Date;
+            status: import("../../../generated/prisma/enums").BloodRequestStatus;
+            units: number;
+            urgency: import("../../../generated/prisma/enums").Urgency;
+        };
+    } & {
         id: string;
-        requiredDate: Date;
-        status: import("../../../generated/prisma/enums").BloodRequestStatus;
+        bloodRequestId: string;
+        donorId: string;
+        responseId: string;
+        status: DonationStatus;
+        donationDate: Date;
         units: number;
-        urgency: import("../../../generated/prisma/enums").Urgency;
+        verifiedAt: Date | null;
+        notes: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    })[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
     };
-} & {
-    id: string;
-    bloodRequestId: string;
-    donorId: string;
-    responseId: string;
-    status: DonationStatus;
-    donationDate: Date;
-    units: number;
-    verifiedAt: Date | null;
-    notes: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-})[]>;
+}>;
 export declare const getDonationById: (userId: string, donationId: string) => Promise<{
     bloodRequest: {
         id: string;
         requesterId: string;
         bloodGroup: import("../../../generated/prisma/enums").BloodGroup;
         units: number;
+        amount: import("@prisma/client-runtime-utils").Decimal;
         hospitalName: string;
         hospitalAddress: string;
         city: string;

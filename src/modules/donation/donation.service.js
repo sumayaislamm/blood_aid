@@ -44,32 +44,64 @@ export const createDonation = async (donorId, responseId, data) => {
     return result;
 };
 // Get all donations for a specific donor
-export const getMyDonations = async (donorId) => {
-    const donations = await prisma.donation.findMany({
-        where: {
-            donorId,
-        },
-        include: {
-            bloodRequest: {
-                select: {
-                    id: true,
-                    bloodGroup: true,
-                    units: true,
-                    hospitalName: true,
-                    hospitalAddress: true,
-                    city: true,
-                    requiredDate: true,
-                    urgency: true,
-                    status: true,
+export const getMyDonations = async (donorId, query) => {
+    const page = Math.max(Number(query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
+    const allowedSortFields = [
+        "createdAt",
+        "updatedAt",
+        "donationDate",
+        "status",
+        "units",
+    ];
+    const sortBy = allowedSortFields.includes(query.sortBy || "")
+        ? query.sortBy
+        : "createdAt";
+    const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
+    const skip = (page - 1) * limit;
+    const [donations, total] = await Promise.all([
+        prisma.donation.findMany({
+            where: {
+                donorId,
+            },
+            include: {
+                bloodRequest: {
+                    select: {
+                        id: true,
+                        bloodGroup: true,
+                        units: true,
+                        hospitalName: true,
+                        hospitalAddress: true,
+                        city: true,
+                        requiredDate: true,
+                        urgency: true,
+                        status: true,
+                    },
                 },
             },
+            orderBy: {
+                [sortBy]: sortOrder,
+            },
+            skip,
+            take: limit,
+        }),
+        prisma.donation.count({
+            where: {
+                donorId,
+            },
+        }),
+    ]);
+    return {
+        donations,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
         },
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
-    return donations;
+    };
 };
+// Get a specific donation by ID for a specific donor
 export const getDonationById = async (userId, donationId) => {
     const donation = await prisma.donation.findUnique({
         where: {
@@ -98,25 +130,24 @@ export const getDonationById = async (userId, donationId) => {
 };
 export const updateDonationStatus = async (userId, donationId, status) => {
     const donation = await prisma.donation.findUnique({
-        where: {
-            id: donationId,
-        },
+        where: { id: donationId },
     });
-    if (!donation) {
+    if (!donation)
         throw new Error("Donation not found");
-    }
     if (donation.donorId !== userId) {
         throw new Error("You can only update your own donation");
     }
+    // Donor can only mark their own pending donation as completed.
+    if (status !== "COMPLETED") {
+        throw new Error("Donors can only mark their donation as COMPLETED. Verification is done by admin.");
+    }
+    if (donation.status !== "PENDING") {
+        throw new Error("Only pending donations can be marked as completed");
+    }
     const updatedDonation = await prisma.donation.update({
-        where: {
-            id: donationId,
-        },
+        where: { id: donationId },
         data: {
-            status,
-            ...(status === "VERIFIED" && {
-                verifiedAt: new Date(),
-            }),
+            status: "COMPLETED",
         },
     });
     return updatedDonation;

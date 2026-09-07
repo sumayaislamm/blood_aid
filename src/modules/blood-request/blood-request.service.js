@@ -6,6 +6,7 @@ export const createBloodRequest = async (requesterId, data) => {
             requesterId,
             bloodGroup: data.bloodGroup,
             units: data.units,
+            amount: data.amount,
             hospitalName: data.hospitalName,
             hospitalAddress: data.hospitalAddress,
             city: data.city,
@@ -13,6 +14,19 @@ export const createBloodRequest = async (requesterId, data) => {
             urgency: data.urgency,
             isPriority: data.isPriority ?? false,
             description: data.description ?? null,
+        },
+    });
+    await prisma.auditLog.create({
+        data: {
+            userId: requesterId,
+            action: "CREATE",
+            entity: "BloodRequest",
+            entityId: bloodRequest.id,
+            details: {
+                bloodGroup: bloodRequest.bloodGroup,
+                units: bloodRequest.units,
+                urgency: bloodRequest.urgency,
+            },
         },
     });
     return bloodRequest;
@@ -25,6 +39,34 @@ export const getAllBloodRequests = async (query) => {
     const where = {
         deletedAt: null,
     };
+    if (query.search) {
+        where.OR = [
+            {
+                hospitalName: {
+                    contains: query.search,
+                    mode: "insensitive",
+                },
+            },
+            {
+                hospitalAddress: {
+                    contains: query.search,
+                    mode: "insensitive",
+                },
+            },
+            {
+                city: {
+                    contains: query.search,
+                    mode: "insensitive",
+                },
+            },
+            {
+                description: {
+                    contains: query.search,
+                    mode: "insensitive",
+                },
+            },
+        ];
+    }
     if (query.bloodGroup) {
         where.bloodGroup = query.bloodGroup;
     }
@@ -40,11 +82,7 @@ export const getAllBloodRequests = async (query) => {
             mode: "insensitive",
         };
     }
-    const allowedSortFields = [
-        "createdAt",
-        "requiredDate",
-        "units",
-    ];
+    const allowedSortFields = ["createdAt", "requiredDate", "units"];
     const sortBy = allowedSortFields.includes(query.sortBy || "")
         ? query.sortBy
         : "createdAt";
@@ -105,6 +143,9 @@ export const updateBloodRequest = async (id, requesterId, data) => {
             ...(data.units !== undefined && {
                 units: data.units,
             }),
+            ...(data.amount !== undefined && {
+                amount: data.amount,
+            }),
             ...(data.hospitalName !== undefined && {
                 hospitalName: data.hospitalName,
             }),
@@ -128,6 +169,17 @@ export const updateBloodRequest = async (id, requesterId, data) => {
             }),
         },
     });
+    await prisma.auditLog.create({
+        data: {
+            userId: requesterId,
+            action: "UPDATE",
+            entity: "BloodRequest",
+            entityId: updatedRequest.id,
+            details: {
+                updatedFields: Object.keys(data),
+            },
+        },
+    });
     return updatedRequest;
 };
 //Deletes a blood request from the database
@@ -148,6 +200,17 @@ export const deleteBloodRequest = async (id, requesterId) => {
         },
         data: {
             deletedAt: new Date(),
+        },
+    });
+    await prisma.auditLog.create({
+        data: {
+            userId: requesterId,
+            action: "DELETE",
+            entity: "BloodRequest",
+            entityId: deletedRequest.id,
+            details: {
+                softDelete: true,
+            },
         },
     });
     return deletedRequest;

@@ -11,15 +11,12 @@ export const createBloodRequestSchema = z.object({
         "O_NEGATIVE",
     ]),
     units: z.number().int().positive(),
+    amount: z.number().positive(),
     hospitalName: z.string().min(2),
     hospitalAddress: z.string().min(2),
     city: z.string().min(2),
     requiredDate: z.string().datetime(),
-    urgency: z.enum([
-        "NORMAL",
-        "URGENT",
-        "CRITICAL",
-    ]),
+    urgency: z.enum(["NORMAL", "URGENT", "CRITICAL"]),
     isPriority: z.boolean().optional(),
     description: z.string().optional(),
 });

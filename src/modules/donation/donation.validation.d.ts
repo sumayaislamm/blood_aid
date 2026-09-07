@@ -10,4 +10,12 @@ export declare const createDonationSchema: z.ZodObject<{
     }>>;
     notes: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
+export declare const updateDonationStatusSchema: z.ZodObject<{
+    status: z.ZodEnum<{
+        CANCELLED: "CANCELLED";
+        COMPLETED: "COMPLETED";
+        PENDING: "PENDING";
+        VERIFIED: "VERIFIED";
+    }>;
+}, z.core.$strip>;
 //# sourceMappingURL=donation.validation.d.ts.map

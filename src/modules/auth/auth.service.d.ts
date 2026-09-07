@@ -43,5 +43,20 @@ export declare const updateUser: (userId: string, data: UpdateUserInput) => Prom
     status: import("../../../generated/prisma/enums").UserStatus;
     updatedAt: Date;
 }>;
+interface GoogleLoginInput {
+    idToken: string;
+}
+export declare const googleLogin: (data: GoogleLoginInput) => Promise<{
+    token: string;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        phone: string | null;
+        role: import("../../../generated/prisma/enums").UserRole;
+        status: "ACTIVE";
+        avatar: string | null;
+    };
+}>;
 export {};
 //# sourceMappingURL=auth.service.d.ts.map

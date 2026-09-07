@@ -5,7 +5,16 @@ import donorProfileRoutes from "./modules/donor-profile/donor-profile.route";
 import donorResponseRoutes from "./modules/donor-response/donor-response.route";
 import donationRoutes from "./modules/donation/donation.route";
 import { errorHandler } from "./middlewares/error.middleware";
+import { authRateLimiter } from "./middlewares/rate-limit.middleware";
+import paymentRoutes from "./modules/payment/payment.route";
+import adminRoutes from "./modules/admin/admin.route";
+import { handleStripeWebhook } from "./modules/payment/payment.controller";
+import cors from "cors";
+import helmet from "helmet";
 const app = express();
+app.post("/api/payments/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
+app.use(cors());
+app.use(helmet());
 app.use(express.json());
 app.get("/", (_req, res) => {
     res.status(200).json({
@@ -14,15 +23,19 @@ app.get("/", (_req, res) => {
     });
 });
 //auth routes
-app.use("/api/auth", authRoutes);
+app.use("/api/v1/auth", authRateLimiter, authRoutes);
 //blood request routes
-app.use("/api/blood-requests", bloodRequestRoutes);
+app.use("/api/v1/blood-requests", bloodRequestRoutes);
 // donor profile routes
-app.use("/api/donor-profile", donorProfileRoutes);
+app.use("/api/v1/donor-profile", donorProfileRoutes);
 //donor response routes
-app.use("/api/donor-responses", donorResponseRoutes);
+app.use("/api/v1/donor-responses", donorResponseRoutes);
 //donation routes
-app.use("/api/donations", donationRoutes);
+app.use("/api/v1/donations", donationRoutes);
+//payment routes
+app.use("/api/v1/payments", paymentRoutes);
+//admin routes
+app.use("/api/v1/admin", adminRoutes);
 //error handler middleware
 app.use(errorHandler);
 //route not found handler
