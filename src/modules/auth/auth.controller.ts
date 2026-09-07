@@ -3,6 +3,7 @@ import {
   loginUser,
   registerUser,
   updateUser,
+  googleLogin,
 } from "./auth.service";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import { prisma } from "../../lib/prisma";
@@ -118,3 +119,21 @@ export const updateMe = async (
   }
 };
 
+// Google Auth
+export const googleAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await googleLogin(req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "Google login successful",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blood Aid Google Login Test</title>
+</head>
+<body>
+  <h2>Blood Aid - Google Login Test</h2>
+
+  <div id="g_id_onload"
+       data-client_id="686512463218-qgdejac1gj02db36feh9u23c37k98fl5.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse">
+  </div>
+
+  <div class="g_id_signin"></div>
+
+  <pre id="result"></pre>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script>
+    function handleCredentialResponse(response) {
+      document.getElementById("result").textContent =
+        JSON.stringify(response, null, 2);
+    }
+  </script>
+</body>
+</html>

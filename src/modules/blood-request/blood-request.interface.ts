@@ -44,3 +44,15 @@ export interface GetBloodRequestsQuery {
   sortBy?: string;
   sortOrder?: string;
 }
+//search 
+export interface GetBloodRequestsQuery {
+  page?: string;
+  limit?: string;
+  search?: string;
+  bloodGroup?: string;
+  urgency?: string;
+  status?: string;
+  city?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}

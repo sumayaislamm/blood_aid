@@ -26,7 +26,7 @@
 
 import { Router } from "express";
 
-import { getMe, login, register, updateMe } from "./auth.controller";
+import { getMe, googleAuth, login, register, updateMe } from "./auth.controller";
 
 import { authenticate, authorize } from "../../middlewares/auth.middleware";
 import { validate } from "../../middlewares/validation.middleware";
@@ -34,6 +34,7 @@ import { validate } from "../../middlewares/validation.middleware";
 import {
   registerSchema,
   loginSchema,
+  googleLoginSchema,
 } from "./auth.validation";
 
 const router = Router();
@@ -48,6 +49,12 @@ router.post(
   "/login",
   validate(loginSchema),
   login
+);
+
+router.post(
+  "/google",
+  validate(googleLoginSchema),
+  googleAuth
 );
 
 router.get("/me", authenticate, getMe);
