@@ -2,6 +2,14 @@
 
 A secure and scalable backend API for connecting blood donors with people who urgently need blood. The platform supports donor registration, blood requests, donor responses, donation tracking, online payment, admin management, audit logging, and role-based access control.
 
+## Live API
+
+**Deployment:** Vercel
+
+**Live URL:** https://blood-aid-flax.vercel.app/
+
+> The API is deployed on Vercel.
+
 ## Features
 
 ### Authentication & Authorization
@@ -22,7 +30,7 @@ A secure and scalable backend API for connecting blood donors with people who ur
 
 * Create, update, view and delete blood requests
 * Search by hospital, address, city and description
-* Filter by:
+* Filtering by:
 
   * Blood group
   * Urgency
@@ -150,7 +158,7 @@ Stripe webhook:
 /api/payments/webhook
 ```
 
-The webhook intentionally remains outside `/api/v1` because Stripe requires the webhook endpoint to be configured directly.
+The Stripe webhook remains outside `/api/v1` because Stripe is configured to send webhook events directly to this endpoint.
 
 ## API Response Format
 
@@ -276,7 +284,7 @@ Important database constraints include:
 ### 1. Clone the repository
 
 ```bash
-git clone <your-github-repository-url>
+git clone https://github.com/sumayaislamm/blood_aid.git
 cd blood-aid
 ```
 
@@ -418,12 +426,12 @@ src/
 │
 ├── app.ts
 └── server.ts
-│
-├── generated/
-│   └── prisma/
-│
+
+generated/
 └── prisma/
-    └── contract.prisma
+
+prisma/
+└── contract.prisma
 ```
 
 ## Business Rules
@@ -461,8 +469,18 @@ The application includes:
 * Soft deletion
 * Audit logging
 
+## API Documentation
+
+Complete API documentation and request examples are provided through the Postman collection included with the project.
+
+The collection covers authentication, blood requests, donor profiles, donor responses, donations, payments, and admin APIs.
+
 ## Author
 
 **Blood Aid — Backend Project**
 
 Built as part of the Programming Hero Backend Project Assignment.
+
+**Developer:** Sumaya Islam
+
+**GitHub:** https://github.com/sumayaislamm
