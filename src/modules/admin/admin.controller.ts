@@ -1,7 +1,9 @@
 import type { NextFunction, Response } from "express";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
+    getAdminBloodRequests,
   getAllUsers,
+  updateBloodRequestStatus,
   updateUserStatus,
   verifyDonation,
 } from "./admin.service";
@@ -74,6 +76,55 @@ export const verifyDonationController = async (
     return res.status(200).json({
       success: true,
       message: "Donation verified successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAdminBloodRequestsController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await getAdminBloodRequests(
+      req.query as any
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Blood requests fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateAdminBloodRequestStatusController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const result = await updateBloodRequestStatus(
+      req.user.userId,
+      req.params.id as string,
+      req.body
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Blood request status updated successfully",
       data: result,
     });
   } catch (error) {

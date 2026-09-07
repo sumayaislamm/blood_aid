@@ -11,3 +11,24 @@ export interface GetUsersQuery {
 export interface UpdateUserStatusInput {
   status: "ACTIVE" | "BLOCKED" | "DELETED";
 }
+
+export interface GetAdminBloodRequestsQuery {
+  page?: string;
+  limit?: string;
+  search?: string;
+  bloodGroup?: string;
+  urgency?: string;
+  status?: string;
+  city?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+export interface UpdateBloodRequestStatusInput {
+  status:
+    | "PENDING"
+    | "MATCHED"
+    | "FULFILLED"
+    | "CANCELLED"
+    | "EXPIRED";
+}

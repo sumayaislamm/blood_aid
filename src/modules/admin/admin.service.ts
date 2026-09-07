@@ -1,6 +1,8 @@
 import { prisma } from "../../lib/prisma";
 import type {
+    GetAdminBloodRequestsQuery,
   GetUsersQuery,
+  UpdateBloodRequestStatusInput,
   UpdateUserStatusInput,
 } from "./admin.interface";
 
@@ -189,4 +191,172 @@ export const verifyDonation = async (
   });
 
   return verifiedDonation;
+};
+
+export const getAdminBloodRequests = async (
+  query: GetAdminBloodRequestsQuery
+) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(
+    Math.max(Number(query.limit) || 10, 1),
+    100
+  );
+
+  const search = query.search?.trim();
+
+  const allowedSortFields = [
+    "createdAt",
+    "updatedAt",
+    "requiredDate",
+    "units",
+    "urgency",
+    "status",
+  ];
+
+  const sortBy = allowedSortFields.includes(query.sortBy || "")
+    ? query.sortBy!
+    : "createdAt";
+
+  const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
+
+  const where = {
+    deletedAt: null,
+
+    ...(search && {
+      OR: [
+        {
+          hospitalName: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          hospitalAddress: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          city: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+      ],
+    }),
+
+    ...(query.bloodGroup && {
+      bloodGroup: query.bloodGroup as any,
+    }),
+
+    ...(query.urgency && {
+      urgency: query.urgency as any,
+    }),
+
+    ...(query.status && {
+      status: query.status as any,
+    }),
+
+    ...(query.city && {
+      city: {
+        equals: query.city,
+        mode: "insensitive" as const,
+      },
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [bloodRequests, total] = await Promise.all([
+    prisma.bloodRequest.findMany({
+      where,
+      include: {
+        requester: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        _count: {
+          select: {
+            responses: true,
+            donations: true,
+            payments: true,
+          },
+        },
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip,
+      take: limit,
+    }),
+
+    prisma.bloodRequest.count({ where }),
+  ]);
+
+  return {
+    bloodRequests,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+export const updateBloodRequestStatus = async (
+  adminId: string,
+  bloodRequestId: string,
+  data: UpdateBloodRequestStatusInput
+) => {
+  const bloodRequest = await prisma.bloodRequest.findFirst({
+    where: {
+      id: bloodRequestId,
+      deletedAt: null,
+    },
+  });
+
+  if (!bloodRequest) {
+    throw new Error("Blood request not found");
+  }
+
+  if (bloodRequest.status === data.status) {
+    throw new Error(
+      `Blood request is already ${data.status}`
+    );
+  }
+
+  const updatedRequest = await prisma.bloodRequest.update({
+    where: {
+      id: bloodRequestId,
+    },
+    data: {
+      status: data.status,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: adminId,
+      action: "UPDATE_STATUS",
+      entity: "BloodRequest",
+      entityId: bloodRequestId,
+      details: {
+        previousStatus: bloodRequest.status,
+        newStatus: data.status,
+      },
+    },
+  });
+
+  return updatedRequest;
 };
