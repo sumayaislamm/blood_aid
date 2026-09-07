@@ -52,3 +52,15 @@ export interface GetAdminPaymentsQuery {
   sortBy?: string;
   sortOrder?: string;
 }
+
+
+//audit logs
+export interface GetAdminAuditLogsQuery {
+  page?: string;
+  limit?: string;
+  search?: string;
+  action?: string;
+  entity?: string;
+  userId?: string;
+  sortOrder?: string;
+}

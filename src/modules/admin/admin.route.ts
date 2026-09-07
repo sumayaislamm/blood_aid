@@ -10,8 +10,10 @@ import {
   getAdminDonationsController,
   getAdminPaymentsController,
   getAdminStatsController,
+  getAdminAuditLogsController,
 } from "./admin.controller";
 import {
+    getAdminAuditLogsQuerySchema,
   getAdminBloodRequestsQuerySchema,
   getAdminDonationsQuerySchema,
   getAdminPaymentsQuerySchema,
@@ -76,5 +78,12 @@ router.get(
 );
 // states
 router.get("/stats", authenticate, authorize("ADMIN"), getAdminStatsController);
-
+// audit logs
+router.get(
+  "/audit-logs",
+  authenticate,
+  authorize("ADMIN"),
+  validate(getAdminAuditLogsQuerySchema),
+  getAdminAuditLogsController
+);
 export default router;

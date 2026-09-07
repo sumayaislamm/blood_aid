@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import type {
-    GetAdminBloodRequestsQuery,
+    GetAdminAuditLogsQuery,
+  GetAdminBloodRequestsQuery,
   GetAdminDonationsQuery,
   GetAdminPaymentsQuery,
   GetUsersQuery,
@@ -101,7 +102,7 @@ export const getAllUsers = async (query: GetUsersQuery) => {
 export const updateUserStatus = async (
   adminId: string,
   userId: string,
-  data: UpdateUserStatusInput
+  data: UpdateUserStatusInput,
 ) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -119,10 +120,7 @@ export const updateUserStatus = async (
     where: { id: userId },
     data: {
       status: data.status,
-      deletedAt:
-        data.status === "DELETED"
-          ? new Date()
-          : null,
+      deletedAt: data.status === "DELETED" ? new Date() : null,
     },
     select: {
       id: true,
@@ -153,10 +151,7 @@ export const updateUserStatus = async (
   return updatedUser;
 };
 
-export const verifyDonation = async (
-  adminId: string,
-  donationId: string
-) => {
+export const verifyDonation = async (adminId: string, donationId: string) => {
   const donation = await prisma.donation.findUnique({
     where: { id: donationId },
   });
@@ -166,9 +161,7 @@ export const verifyDonation = async (
   }
 
   if (donation.status !== "COMPLETED") {
-    throw new Error(
-      "Only completed donations can be verified"
-    );
+    throw new Error("Only completed donations can be verified");
   }
 
   const verifiedDonation = await prisma.donation.update({
@@ -196,13 +189,10 @@ export const verifyDonation = async (
 };
 
 export const getAdminBloodRequests = async (
-  query: GetAdminBloodRequestsQuery
+  query: GetAdminBloodRequestsQuery,
 ) => {
   const page = Math.max(Number(query.page) || 1, 1);
-  const limit = Math.min(
-    Math.max(Number(query.limit) || 10, 1),
-    100
-  );
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
 
   const search = query.search?.trim();
 
@@ -319,7 +309,7 @@ export const getAdminBloodRequests = async (
 export const updateBloodRequestStatus = async (
   adminId: string,
   bloodRequestId: string,
-  data: UpdateBloodRequestStatusInput
+  data: UpdateBloodRequestStatusInput,
 ) => {
   const bloodRequest = await prisma.bloodRequest.findFirst({
     where: {
@@ -333,9 +323,7 @@ export const updateBloodRequestStatus = async (
   }
 
   if (bloodRequest.status === data.status) {
-    throw new Error(
-      `Blood request is already ${data.status}`
-    );
+    throw new Error(`Blood request is already ${data.status}`);
   }
 
   const updatedRequest = await prisma.bloodRequest.update({
@@ -363,15 +351,10 @@ export const updateBloodRequestStatus = async (
   return updatedRequest;
 };
 
-export const getAdminDonations = async (
-  query: GetAdminDonationsQuery
-) => {
+export const getAdminDonations = async (query: GetAdminDonationsQuery) => {
   const page = Math.max(Number(query.page) || 1, 1);
 
-  const limit = Math.min(
-    Math.max(Number(query.limit) || 10, 1),
-    100
-  );
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
 
   const search = query.search?.trim();
 
@@ -387,8 +370,7 @@ export const getAdminDonations = async (
     ? query.sortBy!
     : "createdAt";
 
-  const sortOrder =
-    query.sortOrder === "asc" ? "asc" : "desc";
+  const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
 
   const where = {
     ...(query.status && {
@@ -487,15 +469,10 @@ export const getAdminDonations = async (
   };
 };
 
-export const getAdminPayments = async (
-  query: GetAdminPaymentsQuery
-) => {
+export const getAdminPayments = async (query: GetAdminPaymentsQuery) => {
   const page = Math.max(Number(query.page) || 1, 1);
 
-  const limit = Math.min(
-    Math.max(Number(query.limit) || 10, 1),
-    100
-  );
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
 
   const search = query.search?.trim();
 
@@ -512,8 +489,7 @@ export const getAdminPayments = async (
     ? query.sortBy!
     : "createdAt";
 
-  const sortOrder =
-    query.sortOrder === "asc" ? "asc" : "desc";
+  const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
 
   const where = {
     ...(query.provider && {
@@ -609,8 +585,7 @@ export const getAdminPayments = async (
   };
 };
 
-
-// STATES 
+// STATES
 export const getAdminStats = async () => {
   const [
     totalUsers,
@@ -727,6 +702,111 @@ export const getAdminStats = async () => {
       pending: pendingPayments,
       paidAmount: paidAmount._sum.amount ?? 0,
       currency: "BDT",
+    },
+  };
+};
+
+// audit logs
+export const getAdminAuditLogs = async (query: GetAdminAuditLogsQuery) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
+
+  const search = query.search?.trim();
+
+  const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
+
+  const where = {
+    ...(query.action && {
+      action: {
+        equals: query.action,
+        mode: "insensitive" as const,
+      },
+    }),
+
+    ...(query.entity && {
+      entity: {
+        equals: query.entity,
+        mode: "insensitive" as const,
+      },
+    }),
+
+    ...(query.userId && {
+      userId: query.userId,
+    }),
+
+    ...(search && {
+      OR: [
+        {
+          action: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          entity: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          entityId: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          user: {
+            name: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          user: {
+            email: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+      ],
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [auditLogs, total] = await Promise.all([
+    prisma.auditLog.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: sortOrder,
+      },
+      skip,
+      take: limit,
+    }),
+
+    prisma.auditLog.count({ where }),
+  ]);
+
+  return {
+    auditLogs,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     },
   };
 };

@@ -1,6 +1,7 @@
 import type { NextFunction, Response } from "express";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
+    getAdminAuditLogs,
   getAdminBloodRequests,
   getAdminDonations,
   getAdminPayments,
@@ -181,6 +182,25 @@ export const getAdminStatsController = async (
     return res.status(200).json({
       success: true,
       message: "Admin statistics fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// audit logs
+export const getAdminAuditLogsController = async (
+  _req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await getAdminAuditLogs(_req.query as any);
+
+    return res.status(200).json({
+      success: true,
+      message: "Audit logs fetched successfully",
       data: result,
     });
   } catch (error) {
