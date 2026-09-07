@@ -67,3 +67,22 @@ export const updateBloodRequestStatusSchema = z.object({
     "EXPIRED",
   ]),
 });
+
+export const getAdminDonationsQuerySchema = z.object({
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  search: z.string().optional(),
+  status: z
+    .enum(["PENDING", "COMPLETED", "VERIFIED", "CANCELLED"])
+    .optional(),
+  sortBy: z
+    .enum([
+      "createdAt",
+      "updatedAt",
+      "donationDate",
+      "units",
+      "status",
+    ])
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+});

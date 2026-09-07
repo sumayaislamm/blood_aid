@@ -32,3 +32,12 @@ export interface UpdateBloodRequestStatusInput {
     | "CANCELLED"
     | "EXPIRED";
 }
+
+export interface GetAdminDonationsQuery {
+  page?: string;
+  limit?: string;
+  search?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
