@@ -4,6 +4,7 @@ import {
   getAdminBloodRequests,
   getAdminDonations,
   getAdminPayments,
+  getAdminStats,
   getAllUsers,
   updateBloodRequestStatus,
   updateUserStatus,
@@ -150,20 +151,36 @@ export const getAdminDonationsController = async (
   }
 };
 
-
 export const getAdminPaymentsController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const result = await getAdminPayments(
-      req.query as any
-    );
+    const result = await getAdminPayments(req.query as any);
 
     return res.status(200).json({
       success: true,
       message: "Payments fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// STATES
+export const getAdminStatsController = async (
+  _req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await getAdminStats();
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin statistics fetched successfully",
       data: result,
     });
   } catch (error) {

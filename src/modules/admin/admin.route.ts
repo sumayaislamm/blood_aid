@@ -1,9 +1,6 @@
 import { Router } from "express";
-import {
-  authenticate,
-  authorize,
-} from "../../middlewares/auth.middleware";
-import { validate, } from "../../middlewares/validation.middleware";
+import { authenticate, authorize } from "../../middlewares/auth.middleware";
+import { validate } from "../../middlewares/validation.middleware";
 import {
   getUsers,
   changeUserStatus,
@@ -12,9 +9,10 @@ import {
   getAdminBloodRequestsController,
   getAdminDonationsController,
   getAdminPaymentsController,
+  getAdminStatsController,
 } from "./admin.controller";
 import {
-    getAdminBloodRequestsQuerySchema,
+  getAdminBloodRequestsQuerySchema,
   getAdminDonationsQuerySchema,
   getAdminPaymentsQuerySchema,
   getUsersQuerySchema,
@@ -29,7 +27,7 @@ router.get(
   authenticate,
   authorize("ADMIN"),
   validate(getUsersQuerySchema),
-  getUsers
+  getUsers,
 );
 
 router.patch(
@@ -37,14 +35,14 @@ router.patch(
   authenticate,
   authorize("ADMIN"),
   validate(updateUserStatusSchema),
-  changeUserStatus
+  changeUserStatus,
 );
 
 router.patch(
   "/donations/:id/verify",
   authenticate,
   authorize("ADMIN"),
-  verifyDonationController
+  verifyDonationController,
 );
 
 router.get(
@@ -52,7 +50,7 @@ router.get(
   authenticate,
   authorize("ADMIN"),
   validate(getAdminBloodRequestsQuerySchema),
-  getAdminBloodRequestsController
+  getAdminBloodRequestsController,
 );
 
 router.patch(
@@ -60,21 +58,23 @@ router.patch(
   authenticate,
   authorize("ADMIN"),
   validate(updateBloodRequestStatusSchema),
-  updateAdminBloodRequestStatusController
+  updateAdminBloodRequestStatusController,
 );
 router.get(
   "/donations",
   authenticate,
   authorize("ADMIN"),
   validate(getAdminDonationsQuerySchema),
-  getAdminDonationsController
+  getAdminDonationsController,
 );
 router.get(
   "/payments",
   authenticate,
   authorize("ADMIN"),
   validate(getAdminPaymentsQuerySchema),
-  getAdminPaymentsController
+  getAdminPaymentsController,
 );
+// states
+router.get("/stats", authenticate, authorize("ADMIN"), getAdminStatsController);
 
 export default router;

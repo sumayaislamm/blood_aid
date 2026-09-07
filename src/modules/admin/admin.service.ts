@@ -608,3 +608,125 @@ export const getAdminPayments = async (
     },
   };
 };
+
+
+// STATES 
+export const getAdminStats = async () => {
+  const [
+    totalUsers,
+    totalDonors,
+    totalRequesters,
+    totalBloodRequests,
+    pendingBloodRequests,
+    totalDonations,
+    completedDonations,
+    verifiedDonations,
+    totalPayments,
+    paidPayments,
+    pendingPayments,
+    paidAmount,
+  ] = await Promise.all([
+    prisma.user.count({
+      where: {
+        status: {
+          not: "DELETED",
+        },
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        role: "DONOR",
+        status: {
+          not: "DELETED",
+        },
+      },
+    }),
+
+    prisma.user.count({
+      where: {
+        role: "REQUESTER",
+        status: {
+          not: "DELETED",
+        },
+      },
+    }),
+
+    prisma.bloodRequest.count({
+      where: {
+        deletedAt: null,
+      },
+    }),
+
+    prisma.bloodRequest.count({
+      where: {
+        status: "PENDING",
+        deletedAt: null,
+      },
+    }),
+
+    prisma.donation.count(),
+
+    prisma.donation.count({
+      where: {
+        status: "COMPLETED",
+      },
+    }),
+
+    prisma.donation.count({
+      where: {
+        status: "VERIFIED",
+      },
+    }),
+
+    prisma.payment.count(),
+
+    prisma.payment.count({
+      where: {
+        status: "PAID",
+      },
+    }),
+
+    prisma.payment.count({
+      where: {
+        status: "PENDING",
+      },
+    }),
+
+    prisma.payment.aggregate({
+      _sum: {
+        amount: true,
+      },
+      where: {
+        status: "PAID",
+      },
+    }),
+  ]);
+
+  return {
+    users: {
+      total: totalUsers,
+      donors: totalDonors,
+      requesters: totalRequesters,
+    },
+
+    bloodRequests: {
+      total: totalBloodRequests,
+      pending: pendingBloodRequests,
+    },
+
+    donations: {
+      total: totalDonations,
+      completed: completedDonations,
+      verified: verifiedDonations,
+    },
+
+    payments: {
+      total: totalPayments,
+      paid: paidPayments,
+      pending: pendingPayments,
+      paidAmount: paidAmount._sum.amount ?? 0,
+      currency: "BDT",
+    },
+  };
+};
