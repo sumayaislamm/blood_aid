@@ -2,6 +2,7 @@ import { prisma } from "../../lib/prisma";
 import type {
     GetAdminBloodRequestsQuery,
   GetAdminDonationsQuery,
+  GetAdminPaymentsQuery,
   GetUsersQuery,
   UpdateBloodRequestStatusInput,
   UpdateUserStatusInput,
@@ -477,6 +478,128 @@ export const getAdminDonations = async (
 
   return {
     donations,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+export const getAdminPayments = async (
+  query: GetAdminPaymentsQuery
+) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+
+  const limit = Math.min(
+    Math.max(Number(query.limit) || 10, 1),
+    100
+  );
+
+  const search = query.search?.trim();
+
+  const allowedSortFields = [
+    "createdAt",
+    "updatedAt",
+    "paidAt",
+    "amount",
+    "status",
+    "provider",
+  ];
+
+  const sortBy = allowedSortFields.includes(query.sortBy || "")
+    ? query.sortBy!
+    : "createdAt";
+
+  const sortOrder =
+    query.sortOrder === "asc" ? "asc" : "desc";
+
+  const where = {
+    ...(query.provider && {
+      provider: query.provider as any,
+    }),
+
+    ...(query.status && {
+      status: query.status as any,
+    }),
+
+    ...(search && {
+      OR: [
+        {
+          requester: {
+            name: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          requester: {
+            email: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          bloodRequest: {
+            hospitalName: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          bloodRequest: {
+            city: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+      ],
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [payments, total] = await Promise.all([
+    prisma.payment.findMany({
+      where,
+      include: {
+        requester: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        bloodRequest: {
+          select: {
+            id: true,
+            bloodGroup: true,
+            units: true,
+            amount: true,
+            hospitalName: true,
+            city: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip,
+      take: limit,
+    }),
+
+    prisma.payment.count({ where }),
+  ]);
+
+  return {
+    payments,
     pagination: {
       page,
       limit,

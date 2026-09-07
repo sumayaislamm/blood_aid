@@ -11,10 +11,12 @@ import {
   updateAdminBloodRequestStatusController,
   getAdminBloodRequestsController,
   getAdminDonationsController,
+  getAdminPaymentsController,
 } from "./admin.controller";
 import {
     getAdminBloodRequestsQuerySchema,
   getAdminDonationsQuerySchema,
+  getAdminPaymentsQuerySchema,
   getUsersQuerySchema,
   updateBloodRequestStatusSchema,
   updateUserStatusSchema,
@@ -66,6 +68,13 @@ router.get(
   authorize("ADMIN"),
   validate(getAdminDonationsQuerySchema),
   getAdminDonationsController
+);
+router.get(
+  "/payments",
+  authenticate,
+  authorize("ADMIN"),
+  validate(getAdminPaymentsQuerySchema),
+  getAdminPaymentsController
 );
 
 export default router;

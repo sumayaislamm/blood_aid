@@ -3,6 +3,7 @@ import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
   getAdminBloodRequests,
   getAdminDonations,
+  getAdminPayments,
   getAllUsers,
   updateBloodRequestStatus,
   updateUserStatus,
@@ -142,6 +143,27 @@ export const getAdminDonationsController = async (
     return res.status(200).json({
       success: true,
       message: "Donations fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const getAdminPaymentsController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await getAdminPayments(
+      req.query as any
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Payments fetched successfully",
       data: result,
     });
   } catch (error) {

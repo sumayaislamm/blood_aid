@@ -41,3 +41,14 @@ export interface GetAdminDonationsQuery {
   sortBy?: string;
   sortOrder?: string;
 }
+
+
+export interface GetAdminPaymentsQuery {
+  page?: string;
+  limit?: string;
+  search?: string;
+  provider?: "STRIPE" | "BKASH";
+  status?: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+  sortBy?: string;
+  sortOrder?: string;
+}

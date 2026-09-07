@@ -86,3 +86,25 @@ export const getAdminDonationsQuerySchema = z.object({
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
+
+
+export const getAdminPaymentsQuerySchema = z.object({
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  search: z.string().optional(),
+  provider: z.enum(["STRIPE", "BKASH"]).optional(),
+  status: z
+    .enum(["PENDING", "PAID", "FAILED", "REFUNDED"])
+    .optional(),
+  sortBy: z
+    .enum([
+      "createdAt",
+      "updatedAt",
+      "paidAt",
+      "amount",
+      "status",
+      "provider",
+    ])
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+});
