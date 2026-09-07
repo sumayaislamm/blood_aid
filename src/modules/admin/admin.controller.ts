@@ -3,6 +3,7 @@ import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
   getAllUsers,
   updateUserStatus,
+  verifyDonation,
 } from "./admin.service";
 
 export const getUsers = async (
@@ -45,6 +46,34 @@ export const changeUserStatus = async (
     return res.status(200).json({
       success: true,
       message: "User status updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyDonationController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const result = await verifyDonation(
+      req.user.userId,
+      req.params.id as string,
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Donation verified successfully",
       data: result,
     });
   } catch (error) {

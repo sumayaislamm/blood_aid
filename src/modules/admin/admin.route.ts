@@ -7,6 +7,7 @@ import { validate } from "../../middlewares/validation.middleware";
 import {
   getUsers,
   changeUserStatus,
+  verifyDonationController,
 } from "./admin.controller";
 import {
   getUsersQuerySchema,
@@ -29,6 +30,13 @@ router.patch(
   authorize("ADMIN"),
   validate(updateUserStatusSchema),
   changeUserStatus
+);
+
+router.patch(
+  "/donations/:id/verify",
+  authenticate,
+  authorize("ADMIN"),
+  verifyDonationController
 );
 
 export default router;

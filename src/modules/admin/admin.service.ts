@@ -148,3 +148,45 @@ export const updateUserStatus = async (
 
   return updatedUser;
 };
+
+export const verifyDonation = async (
+  adminId: string,
+  donationId: string
+) => {
+  const donation = await prisma.donation.findUnique({
+    where: { id: donationId },
+  });
+
+  if (!donation) {
+    throw new Error("Donation not found");
+  }
+
+  if (donation.status !== "COMPLETED") {
+    throw new Error(
+      "Only completed donations can be verified"
+    );
+  }
+
+  const verifiedDonation = await prisma.donation.update({
+    where: { id: donationId },
+    data: {
+      status: "VERIFIED",
+      verifiedAt: new Date(),
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: adminId,
+      action: "VERIFY",
+      entity: "Donation",
+      entityId: donationId,
+      details: {
+        previousStatus: donation.status,
+        newStatus: "VERIFIED",
+      },
+    },
+  });
+
+  return verifiedDonation;
+};
