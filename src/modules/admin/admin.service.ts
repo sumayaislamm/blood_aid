@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import type {
     GetAdminBloodRequestsQuery,
+  GetAdminDonationsQuery,
   GetUsersQuery,
   UpdateBloodRequestStatusInput,
   UpdateUserStatusInput,
@@ -359,4 +360,128 @@ export const updateBloodRequestStatus = async (
   });
 
   return updatedRequest;
+};
+
+export const getAdminDonations = async (
+  query: GetAdminDonationsQuery
+) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+
+  const limit = Math.min(
+    Math.max(Number(query.limit) || 10, 1),
+    100
+  );
+
+  const search = query.search?.trim();
+
+  const allowedSortFields = [
+    "createdAt",
+    "updatedAt",
+    "donationDate",
+    "units",
+    "status",
+  ];
+
+  const sortBy = allowedSortFields.includes(query.sortBy || "")
+    ? query.sortBy!
+    : "createdAt";
+
+  const sortOrder =
+    query.sortOrder === "asc" ? "asc" : "desc";
+
+  const where = {
+    ...(query.status && {
+      status: query.status as any,
+    }),
+
+    ...(search && {
+      OR: [
+        {
+          donor: {
+            name: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          donor: {
+            email: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          bloodRequest: {
+            hospitalName: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          bloodRequest: {
+            city: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+      ],
+    }),
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [donations, total] = await Promise.all([
+    prisma.donation.findMany({
+      where,
+      include: {
+        donor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        bloodRequest: {
+          select: {
+            id: true,
+            bloodGroup: true,
+            units: true,
+            hospitalName: true,
+            city: true,
+            status: true,
+          },
+        },
+        response: {
+          select: {
+            id: true,
+            status: true,
+            message: true,
+            respondedAt: true,
+          },
+        },
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip,
+      take: limit,
+    }),
+
+    prisma.donation.count({ where }),
+  ]);
+
+  return {
+    donations,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };

@@ -1,7 +1,8 @@
 import type { NextFunction, Response } from "express";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
-    getAdminBloodRequests,
+  getAdminBloodRequests,
+  getAdminDonations,
   getAllUsers,
   updateBloodRequestStatus,
   updateUserStatus,
@@ -11,7 +12,7 @@ import {
 export const getUsers = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const result = await getAllUsers(req.query as any);
@@ -29,7 +30,7 @@ export const getUsers = async (
 export const changeUserStatus = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -42,7 +43,7 @@ export const changeUserStatus = async (
     const result = await updateUserStatus(
       req.user.userId,
       req.params.id as string,
-      req.body
+      req.body,
     );
 
     return res.status(200).json({
@@ -58,7 +59,7 @@ export const changeUserStatus = async (
 export const verifyDonationController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -86,12 +87,10 @@ export const verifyDonationController = async (
 export const getAdminBloodRequestsController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const result = await getAdminBloodRequests(
-      req.query as any
-    );
+    const result = await getAdminBloodRequests(req.query as any);
 
     return res.status(200).json({
       success: true,
@@ -106,7 +105,7 @@ export const getAdminBloodRequestsController = async (
 export const updateAdminBloodRequestStatusController = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -119,12 +118,30 @@ export const updateAdminBloodRequestStatusController = async (
     const result = await updateBloodRequestStatus(
       req.user.userId,
       req.params.id as string,
-      req.body
+      req.body,
     );
 
     return res.status(200).json({
       success: true,
       message: "Blood request status updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAdminDonationsController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await getAdminDonations(req.query as any);
+
+    return res.status(200).json({
+      success: true,
+      message: "Donations fetched successfully",
       data: result,
     });
   } catch (error) {

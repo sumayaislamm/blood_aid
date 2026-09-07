@@ -10,9 +10,11 @@ import {
   verifyDonationController,
   updateAdminBloodRequestStatusController,
   getAdminBloodRequestsController,
+  getAdminDonationsController,
 } from "./admin.controller";
 import {
     getAdminBloodRequestsQuerySchema,
+  getAdminDonationsQuerySchema,
   getUsersQuerySchema,
   updateBloodRequestStatusSchema,
   updateUserStatusSchema,
@@ -57,6 +59,13 @@ router.patch(
   authorize("ADMIN"),
   validate(updateBloodRequestStatusSchema),
   updateAdminBloodRequestStatusController
+);
+router.get(
+  "/donations",
+  authenticate,
+  authorize("ADMIN"),
+  validate(getAdminDonationsQuerySchema),
+  getAdminDonationsController
 );
 
 export default router;
