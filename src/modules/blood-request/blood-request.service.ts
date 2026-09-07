@@ -1,12 +1,14 @@
 import { prisma } from "../../lib/prisma";
-import type { CreateBloodRequestInput, GetBloodRequestsQuery, UpdateBloodRequestInput } from "./blood-request.interface";
-
+import type {
+  CreateBloodRequestInput,
+  GetBloodRequestsQuery,
+  UpdateBloodRequestInput,
+} from "./blood-request.interface";
 
 //Creates a new blood request in the database
 export const createBloodRequest = async (
   requesterId: string,
-  data: CreateBloodRequestInput
-  
+  data: CreateBloodRequestInput,
 ) => {
   const bloodRequest = await prisma.bloodRequest.create({
     data: {
@@ -24,25 +26,63 @@ export const createBloodRequest = async (
     },
   });
 
+  await prisma.auditLog.create({
+    data: {
+      userId: requesterId,
+      action: "CREATE",
+      entity: "BloodRequest",
+      entityId: bloodRequest.id,
+      details: {
+        bloodGroup: bloodRequest.bloodGroup,
+        units: bloodRequest.units,
+        urgency: bloodRequest.urgency,
+      },
+    },
+  });
+
   return bloodRequest;
 };
 
 //Fetches all blood requests from the database
 
-export const getAllBloodRequests = async (
-  query: GetBloodRequestsQuery
-) => {
+export const getAllBloodRequests = async (query: GetBloodRequestsQuery) => {
   const page = Math.max(Number(query.page) || 1, 1);
-  const limit = Math.min(
-    Math.max(Number(query.limit) || 10, 1),
-    100
-  );
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
 
   const skip = (page - 1) * limit;
 
   const where: any = {
     deletedAt: null,
   };
+
+  if (query.search) {
+    where.OR = [
+      {
+        hospitalName: {
+          contains: query.search,
+          mode: "insensitive",
+        },
+      },
+      {
+        hospitalAddress: {
+          contains: query.search,
+          mode: "insensitive",
+        },
+      },
+      {
+        city: {
+          contains: query.search,
+          mode: "insensitive",
+        },
+      },
+      {
+        description: {
+          contains: query.search,
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
 
   if (query.bloodGroup) {
     where.bloodGroup = query.bloodGroup;
@@ -63,18 +103,13 @@ export const getAllBloodRequests = async (
     };
   }
 
-  const allowedSortFields = [
-    "createdAt",
-    "requiredDate",
-    "units",
-  ];
+  const allowedSortFields = ["createdAt", "requiredDate", "units"];
 
   const sortBy = allowedSortFields.includes(query.sortBy || "")
     ? query.sortBy!
     : "createdAt";
 
-  const sortOrder =
-    query.sortOrder === "asc" ? "asc" : "desc";
+  const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
 
   const [requests, total] = await Promise.all([
     prisma.bloodRequest.findMany({
@@ -119,7 +154,7 @@ export const getBloodRequestById = async (id: string) => {
 export const updateBloodRequest = async (
   id: string,
   requesterId: string,
-  data: UpdateBloodRequestInput
+  data: UpdateBloodRequestInput,
 ) => {
   const request = await prisma.bloodRequest.findFirst({
     where: {
@@ -145,8 +180,8 @@ export const updateBloodRequest = async (
         units: data.units,
       }),
       ...(data.amount !== undefined && {
-  amount: data.amount,
-}),
+        amount: data.amount,
+      }),
       ...(data.hospitalName !== undefined && {
         hospitalName: data.hospitalName,
       }),
@@ -170,16 +205,22 @@ export const updateBloodRequest = async (
       }),
     },
   });
-
+  await prisma.auditLog.create({
+    data: {
+      userId: requesterId,
+      action: "UPDATE",
+      entity: "BloodRequest",
+      entityId: updatedRequest.id,
+      details: {
+        updatedFields: Object.keys(data),
+      },
+    },
+  });
   return updatedRequest;
 };
 
-
 //Deletes a blood request from the database
-export const deleteBloodRequest = async (
-  id: string,
-  requesterId: string
-) => {
+export const deleteBloodRequest = async (id: string, requesterId: string) => {
   const request = await prisma.bloodRequest.findFirst({
     where: {
       id,
@@ -200,15 +241,24 @@ export const deleteBloodRequest = async (
       deletedAt: new Date(),
     },
   });
-
+  await prisma.auditLog.create({
+    data: {
+      userId: requesterId,
+      action: "DELETE",
+      entity: "BloodRequest",
+      entityId: deletedRequest.id,
+      details: {
+        softDelete: true,
+      },
+    },
+  });
   return deletedRequest;
 };
-
 
 // Fetches all donor responses for a specific blood request
 export const getBloodRequestResponses = async (
   requesterId: string,
-  bloodRequestId: string
+  bloodRequestId: string,
 ) => {
   const bloodRequest = await prisma.bloodRequest.findUnique({
     where: {
@@ -221,9 +271,7 @@ export const getBloodRequestResponses = async (
   }
 
   if (bloodRequest.requesterId !== requesterId) {
-    throw new Error(
-      "You can only view responses to your own blood requests"
-    );
+    throw new Error("You can only view responses to your own blood requests");
   }
 
   const responses = await prisma.donorResponse.findMany({
