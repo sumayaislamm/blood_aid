@@ -1,4 +1,4 @@
-import type { BloodGroup, Gender } from "../../../generated/prisma/enums";
+import type { BloodGroup, Gender } from "../../../generated/prisma/enums.js";
 
 export interface CreateDonorProfileInput {
   bloodGroup: BloodGroup;

@@ -1,41 +1,16 @@
-// import { Router } from "express";
-// import { getMe, login, register, updateMe } from "./auth.controller";
-// import { authenticate, authorize } from "../../middlewares/auth.middleware";
-
-// const router = Router();
-
-// router.post("/register", register);
-// router.post("/login", login);
-// router.get("/me", authenticate, getMe);
-// router.patch("/me", authenticate, updateMe);
-
-// router.get(
-//   "/admin-test",
-//   authenticate,
-//   authorize("ADMIN"),
-//   (_req, res) => {
-//     res.status(200).json({
-//       success: true,
-//       message: "Admin access granted",
-//     });
-//   }
-// );
-
-
-// export default router;
 
 import { Router } from "express";
 
-import { getMe, googleAuth, login, register, updateMe } from "./auth.controller";
+import { getMe, googleAuth, login, register, updateMe } from "./auth.controller.js";
 
-import { authenticate, authorize } from "../../middlewares/auth.middleware";
-import { validate } from "../../middlewares/validation.middleware";
+import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { validate } from "../../middlewares/validation.middleware.js";
 
 import {
   registerSchema,
   loginSchema,
   googleLoginSchema,
-} from "./auth.validation";
+} from "./auth.validation.js";
 
 const router = Router();
 

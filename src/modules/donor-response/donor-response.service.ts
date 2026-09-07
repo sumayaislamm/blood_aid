@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import type { CreateDonorResponseInput, UpdateDonorResponseInput, UpdateDonorResponseStatusInput } from "./donor-response.interface";
+import { prisma } from "../../lib/prisma.js";
+import type { CreateDonorResponseInput, UpdateDonorResponseInput, UpdateDonorResponseStatusInput } from "./donor-response.interface.js";
 
 export const createDonorResponse = async (
   donorId: string,

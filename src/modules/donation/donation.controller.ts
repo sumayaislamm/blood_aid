@@ -1,12 +1,12 @@
 import type { Response, NextFunction } from "express";
-import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware.js";
 import {
   createDonation,
   getDonationById,
   getMyDonations,
   updateDonationStatus,
-} from "./donation.service";
-import type { GetMyDonationsQuery } from "./donation.interface";
+} from "./donation.service.js";
+import type { GetMyDonationsQuery } from "./donation.interface.js";
 
 export const createDonationController = async (
   req: AuthenticatedRequest,

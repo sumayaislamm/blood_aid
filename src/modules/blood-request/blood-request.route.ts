@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { authenticate, authorize } from "../../middlewares/auth.middleware";
-import { createRequest, deleteRequest, getAllRequests, getRequestById, getRequestResponses, updateRequest } from "./blood-request.controller";
-import { validate } from "../../middlewares/validation.middleware";
+import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { createRequest, deleteRequest, getAllRequests, getRequestById, getRequestResponses, updateRequest } from "./blood-request.controller.js";
+import { validate } from "../../middlewares/validation.middleware.js";
 
 import {
   createBloodRequestSchema,
   updateBloodRequestSchema,
-} from "./blood-request.validation";
+} from "./blood-request.validation.js";
 
 const router = Router();
 

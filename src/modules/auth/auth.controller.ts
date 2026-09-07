@@ -4,9 +4,9 @@ import {
   registerUser,
   updateUser,
   googleLogin,
-} from "./auth.service";
-import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
-import { prisma } from "../../lib/prisma";
+} from "./auth.service.js";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware.js";
+import { prisma } from "../../lib/prisma.js";
 
 // Register
 export const register = async (

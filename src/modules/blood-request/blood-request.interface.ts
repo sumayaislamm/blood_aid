@@ -1,4 +1,4 @@
-import type { BloodGroup, Urgency } from "../../../generated/prisma/enums";
+import type { BloodGroup, Urgency } from "../../../generated/prisma/enums.js";
 
 export interface CreateBloodRequestInput {
   bloodGroup:

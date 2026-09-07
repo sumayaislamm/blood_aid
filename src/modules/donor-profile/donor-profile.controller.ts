@@ -1,6 +1,6 @@
 import type { Response } from "express";
-import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
-import { createDonorProfile, getMyDonorProfile, updateMyDonorProfile } from "./donor-profile.service";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware.js";
+import { createDonorProfile, getMyDonorProfile, updateMyDonorProfile } from "./donor-profile.service.js";
 
 export const createProfile = async (
   req: AuthenticatedRequest,

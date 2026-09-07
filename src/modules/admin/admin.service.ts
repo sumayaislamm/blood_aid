@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 import type {
     GetAdminAuditLogsQuery,
   GetAdminBloodRequestsQuery,
@@ -7,7 +7,7 @@ import type {
   GetUsersQuery,
   UpdateBloodRequestStatusInput,
   UpdateUserStatusInput,
-} from "./admin.interface";
+} from "./admin.interface.js";
 
 export const getAllUsers = async (query: GetUsersQuery) => {
   const page = Math.max(Number(query.page) || 1, 1);

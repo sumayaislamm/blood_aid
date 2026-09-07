@@ -1,6 +1,6 @@
 
 import type { Response, NextFunction } from "express";
-import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware.js";
 import {
   createBloodRequest,
   deleteBloodRequest,
@@ -8,8 +8,8 @@ import {
   getBloodRequestById,
   getBloodRequestResponses,
   updateBloodRequest,
-} from "./blood-request.service";
-import type { GetBloodRequestsQuery } from "./blood-request.interface";
+} from "./blood-request.service.js";
+import type { GetBloodRequestsQuery } from "./blood-request.interface.js";
 
 // Creates a new blood request in the database
 export const createRequest = async (

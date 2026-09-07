@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authenticate, authorize } from "../../middlewares/auth.middleware";
-import { validate } from "../../middlewares/validation.middleware";
+import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { validate } from "../../middlewares/validation.middleware.js";
 import {
   getUsers,
   changeUserStatus,
@@ -11,7 +11,7 @@ import {
   getAdminPaymentsController,
   getAdminStatsController,
   getAdminAuditLogsController,
-} from "./admin.controller";
+} from "./admin.controller.js";
 import {
     getAdminAuditLogsQuerySchema,
   getAdminBloodRequestsQuerySchema,
@@ -20,7 +20,7 @@ import {
   getUsersQuerySchema,
   updateBloodRequestStatusSchema,
   updateUserStatusSchema,
-} from "./admin.validation";
+} from "./admin.validation.js";
 
 const router = Router();
 

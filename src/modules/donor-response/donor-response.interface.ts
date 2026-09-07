@@ -1,4 +1,4 @@
-import type { DonorResponseStatus } from "../../../generated/prisma/enums";
+import type { DonorResponseStatus } from "../../../generated/prisma/enums.js";
 
 export interface CreateDonorResponseInput {
   bloodRequestId: string;

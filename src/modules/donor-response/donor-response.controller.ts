@@ -1,12 +1,12 @@
 import type { Response, NextFunction } from "express";
-import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware.js";
 import {
   createDonorResponse,
   getMyDonorResponses,
   updateDonorResponseStatus,
   updateMyDonorResponse,
-} from "./donor-response.service";
-import type { GetMyDonorResponsesQuery } from "./donor-response.interface";
+} from "./donor-response.service.js";
+import type { GetMyDonorResponsesQuery } from "./donor-response.interface.js";
 
 export const createResponse = async (
   req: AuthenticatedRequest,

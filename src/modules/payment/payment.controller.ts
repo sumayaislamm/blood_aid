@@ -1,11 +1,11 @@
 
 import type { Request, Response, NextFunction } from "express";
-import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware.js";
 import Stripe from "stripe";
-import { PaymentStatus } from "../../../generated/prisma/enums";
-import { prisma } from "../../lib/prisma";
-import { stripe } from "../../lib/stripe";
-import { createPayment } from "./payment.service";
+import { PaymentStatus } from "../../../generated/prisma/enums.js";
+import { prisma } from "../../lib/prisma.js";
+import { stripe } from "../../lib/stripe.js";
+import { createPayment } from "./payment.service.js";
 
 export const initiatePayment = async (
   req: AuthenticatedRequest,

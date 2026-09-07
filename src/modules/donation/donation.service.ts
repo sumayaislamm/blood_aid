@@ -1,13 +1,13 @@
-import type { DonationStatus } from "../../../generated/prisma/enums";
-import { prisma } from "../../lib/prisma";
-import type { CreateDonationInput } from "./donation.interface";
+import type { DonationStatus } from "../../../generated/prisma/enums.js";
+import { prisma } from "../../lib/prisma.js";
+import type { CreateDonationInput } from "./donation.interface.js";
 
 export const createDonation = async (
   donorId: string,
   responseId: string,
   data: CreateDonationInput
 ) => {
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx : any) => {
     const response = await tx.donorResponse.findUnique({
       where: {
         id: responseId,

@@ -1,9 +1,9 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 import type {
   CreateBloodRequestInput,
   GetBloodRequestsQuery,
   UpdateBloodRequestInput,
-} from "./blood-request.interface";
+} from "./blood-request.interface.js";
 
 //Creates a new blood request in the database
 export const createBloodRequest = async (

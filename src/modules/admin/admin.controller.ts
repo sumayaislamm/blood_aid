@@ -1,5 +1,5 @@
 import type { NextFunction, Response } from "express";
-import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware.js";
 import {
     getAdminAuditLogs,
   getAdminBloodRequests,
@@ -10,7 +10,7 @@ import {
   updateBloodRequestStatus,
   updateUserStatus,
   verifyDonation,
-} from "./admin.service";
+} from "./admin.service.js";
 
 export const getUsers = async (
   req: AuthenticatedRequest,

@@ -1,4 +1,4 @@
-import type { DonationStatus } from "../../../generated/prisma/enums";
+import type { DonationStatus } from "../../../generated/prisma/enums.js";
 
 export interface CreateDonationInput {
   donationDate: string;

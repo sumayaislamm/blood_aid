@@ -1,14 +1,14 @@
 import express from "express";
-import authRoutes from "./modules/auth/auth.route";
-import bloodRequestRoutes from "./modules/blood-request/blood-request.route";
-import donorProfileRoutes from "./modules/donor-profile/donor-profile.route";
-import donorResponseRoutes from "./modules/donor-response/donor-response.route";
-import donationRoutes from "./modules/donation/donation.route";
-import { errorHandler } from "./middlewares/error.middleware";
-import { authRateLimiter } from "./middlewares/rate-limit.middleware";
-import paymentRoutes from "./modules/payment/payment.route";
-import adminRoutes from "./modules/admin/admin.route";
-import { handleStripeWebhook } from "./modules/payment/payment.controller";
+import authRoutes from "./modules/auth/auth.route.js";
+import bloodRequestRoutes from "./modules/blood-request/blood-request.route.js";
+import donorProfileRoutes from "./modules/donor-profile/donor-profile.route.js";
+import donorResponseRoutes from "./modules/donor-response/donor-response.route.js";
+import donationRoutes from "./modules/donation/donation.route.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
+import { authRateLimiter } from "./middlewares/rate-limit.middleware.js";
+import paymentRoutes from "./modules/payment/payment.route.js";
+import adminRoutes from "./modules/admin/admin.route.js";
+import { handleStripeWebhook } from "./modules/payment/payment.controller.js";
 import cors from "cors";
 import helmet from "helmet";
 

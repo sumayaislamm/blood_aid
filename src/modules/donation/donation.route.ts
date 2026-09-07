@@ -2,10 +2,10 @@ import { Router } from "express";
 import {
   authenticate,
   authorize,
-} from "../../middlewares/auth.middleware";
-import { createDonationController, getDonationByIdController, getMyDonationsController, updateDonationStatusController } from "./donation.controller";
-import { createDonationSchema, updateDonationStatusSchema } from "./donation.validation";
-import { validate } from "../../middlewares/validation.middleware";
+} from "../../middlewares/auth.middleware.js";
+import { createDonationController, getDonationByIdController, getMyDonationsController, updateDonationStatusController } from "./donation.controller.js";
+import { createDonationSchema, updateDonationStatusSchema } from "./donation.validation.js";
+import { validate } from "../../middlewares/validation.middleware.js";
 
 const router = Router();
 
