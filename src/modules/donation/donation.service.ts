@@ -179,28 +179,32 @@ export const updateDonationStatus = async (
   status: DonationStatus
 ) => {
   const donation = await prisma.donation.findUnique({
-    where: {
-      id: donationId,
-    },
+    where: { id: donationId },
   });
 
-  if (!donation) {
-    throw new Error("Donation not found");
-  }
+  if (!donation) throw new Error("Donation not found");
 
   if (donation.donorId !== userId) {
     throw new Error("You can only update your own donation");
   }
 
+  // Donor can only mark their own pending donation as completed.
+  if (status !== "COMPLETED") {
+    throw new Error(
+      "Donors can only mark their donation as COMPLETED. Verification is done by admin."
+    );
+  }
+
+  if (donation.status !== "PENDING") {
+    throw new Error(
+      "Only pending donations can be marked as completed"
+    );
+  }
+
   const updatedDonation = await prisma.donation.update({
-    where: {
-      id: donationId,
-    },
+    where: { id: donationId },
     data: {
-      status,
-      ...(status === "VERIFIED" && {
-        verifiedAt: new Date(),
-      }),
+      status: "COMPLETED",
     },
   });
 

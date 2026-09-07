@@ -7,6 +7,7 @@ import donationRoutes from "./modules/donation/donation.route";
 import { errorHandler } from "./middlewares/error.middleware";
 import { authRateLimiter } from "./middlewares/rate-limit.middleware";
 import paymentRoutes from "./modules/payment/payment.route";
+import adminRoutes from "./modules/admin/admin.route";
 import { handleStripeWebhook } from "./modules/payment/payment.controller";
 import cors from "cors";
 import helmet from "helmet";
@@ -48,6 +49,8 @@ app.use("/api/v1/donor-responses", donorResponseRoutes);
 app.use("/api/v1/donations", donationRoutes);
 //payment routes
 app.use("/api/v1/payments", paymentRoutes);
+//admin routes
+app.use("/api/v1/admin", adminRoutes);
 
 //error handler middleware
 app.use(errorHandler);

@@ -4,7 +4,12 @@ import type { ZodType } from "zod";
 export const validate =
   (schema: ZodType) =>
   (req: Request, res: Response, next: NextFunction) => {
-    const result = schema.safeParse(req.body);
+    const input =
+      req.method === "GET" || req.method === "DELETE"
+        ? req.query
+        : req.body;
+
+    const result = schema.safeParse(input);
 
     if (!result.success) {
       return res.status(400).json({
@@ -17,6 +22,9 @@ export const validate =
       });
     }
 
-    req.body = result.data;
+    if (req.method !== "GET" && req.method !== "DELETE") {
+      req.body = result.data;
+    }
+
     next();
   };
