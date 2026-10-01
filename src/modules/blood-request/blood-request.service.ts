@@ -137,6 +137,47 @@ export const getAllBloodRequests = async (query: GetBloodRequestsQuery) => {
   };
 };
 
+// Fetches blood requests created by the authenticated requester
+export const getMyBloodRequests = async (
+  requesterId: string,
+  query: GetBloodRequestsQuery,
+) => {
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {
+    requesterId,
+    deletedAt: null,
+  };
+
+  const [requests, total] = await Promise.all([
+    prisma.bloodRequest.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+
+    prisma.bloodRequest.count({
+      where,
+    }),
+  ]);
+
+  return {
+    requests,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
 //Fetches a blood request by its ID from the database
 export const getBloodRequestById = async (id: string) => {
   const request = await prisma.bloodRequest.findFirst({

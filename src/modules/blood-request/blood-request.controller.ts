@@ -7,6 +7,7 @@ import {
   getAllBloodRequests,
   getBloodRequestById,
   getBloodRequestResponses,
+  getMyBloodRequests,
   updateBloodRequest,
 } from "./blood-request.service.js";
 import type { GetBloodRequestsQuery } from "./blood-request.interface.js";
@@ -88,6 +89,37 @@ export const getRequestById = async (
     next(error);
   }
 };
+
+
+export const getMyRequests = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const requests = await getMyBloodRequests(
+      req.user.userId,
+      req.query as GetBloodRequestsQuery,
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "My blood requests fetched successfully",
+      data: requests.requests,
+      pagination: requests.pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 // Updates a blood request in the database
 export const updateRequest = async (

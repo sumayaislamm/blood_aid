@@ -1,6 +1,14 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
-import { createRequest, deleteRequest, getAllRequests, getRequestById, getRequestResponses, updateRequest } from "./blood-request.controller.js";
+import {
+  createRequest,
+  deleteRequest,
+  getAllRequests,
+  getMyRequests,
+  getRequestById,
+  getRequestResponses,
+  updateRequest,
+} from "./blood-request.controller.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 
 import {
@@ -15,37 +23,24 @@ router.post(
   authenticate,
   authorize("REQUESTER"),
   validate(createBloodRequestSchema),
-  createRequest
+  createRequest,
 );
-router.get(
-  "/",
-  authenticate,
-  getAllRequests
-);
+router.get("/", authenticate, getAllRequests);
+router.get("/my-requests", authenticate, authorize("REQUESTER"), getMyRequests);
 router.get(
   "/:id/responses",
   authenticate,
   authorize("REQUESTER"),
-  getRequestResponses
+  getRequestResponses,
 );
-router.get(
-  "/:id",
-  authenticate,
-  getRequestById
-);
+router.get("/:id", authenticate, getRequestById);
 router.patch(
   "/:id",
   authenticate,
   authorize("REQUESTER"),
   validate(updateBloodRequestSchema),
-  updateRequest
+  updateRequest,
 );
-router.delete(
-  "/:id",
-  authenticate,
-  authorize("REQUESTER"),
-  deleteRequest
-);
-
+router.delete("/:id", authenticate, authorize("REQUESTER"), deleteRequest);
 
 export default router;
