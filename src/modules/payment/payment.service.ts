@@ -141,3 +141,27 @@ export const createPayment = async (
     throw error;
   }
 };
+
+export const getMyPayments = async (requesterId: string) => {
+  return prisma.payment.findMany({
+    where: {
+      requesterId,
+    },
+    include: {
+      bloodRequest: {
+        select: {
+          id: true,
+          bloodGroup: true,
+          units: true,
+          amount: true,
+          hospitalName: true,
+          city: true,
+          status: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};

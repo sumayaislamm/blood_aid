@@ -5,7 +5,7 @@ import Stripe from "stripe";
 import { PaymentStatus } from "../../../generated/prisma/enums.js";
 import { prisma } from "../../lib/prisma.js";
 import { stripe } from "../../lib/stripe.js";
-import { createPayment } from "./payment.service.js";
+import { createPayment, getMyPayments } from "./payment.service.js";
 
 export const initiatePayment = async (
   req: AuthenticatedRequest,
@@ -187,6 +187,31 @@ export const getPaymentById = async (
       success: true,
       message: "Payment retrieved successfully",
       data: payment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyPaymentsController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const payments = await getMyPayments(req.user.userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Payments retrieved successfully",
+      data: payments,
     });
   } catch (error) {
     next(error);

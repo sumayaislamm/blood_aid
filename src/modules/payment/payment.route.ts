@@ -5,7 +5,7 @@ import {
 } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { createPaymentSchema } from "./payment.validation.js";
-import { initiatePayment, getPaymentById } from "./payment.controller.js";
+import { initiatePayment, getPaymentById, getMyPaymentsController } from "./payment.controller.js";
 
 
 const router = Router();
@@ -17,6 +17,14 @@ router.post(
   validate(createPaymentSchema),
   initiatePayment
 );
+
+router.get(
+  "/my-payments",
+  authenticate,
+  authorize("REQUESTER"),
+  getMyPaymentsController
+);
+
 router.get(
   "/:id",
   authenticate,
