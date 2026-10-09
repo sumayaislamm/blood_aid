@@ -153,47 +153,143 @@ export const updateMyDonorResponse = async (
 
 // Update the status of a donor response for a specific blood request
 
+// export const updateDonorResponseStatus = async (
+//   requesterId: string,
+//   responseId: string,
+//   data: UpdateDonorResponseStatusInput
+// ) => {
+//   const response = await prisma.donorResponse.findUnique({
+//     where: {
+//       id: responseId,
+//     },
+//     include: {
+//       bloodRequest: true,
+//     },
+//   });
+
+//   if (!response) {
+//     throw new Error("Donor response not found");
+//   }
+
+//   if (response.bloodRequest.requesterId !== requesterId) {
+//     throw new Error(
+//       "You can only manage responses to your own blood requests"
+//     );
+//   }
+
+//   if (response.status !== "PENDING") {
+//     throw new Error("Only pending responses can be accepted or rejected");
+//   }
+
+//   if (data.status !== "ACCEPTED" && data.status !== "REJECTED") {
+//     throw new Error("Status must be ACCEPTED or REJECTED");
+//   }
+
+//   const updatedResponse = await prisma.donorResponse.update({
+//     where: {
+//       id: responseId,
+//     },
+//     data: {
+//       status: data.status,
+//       respondedAt: new Date(),
+//     },
+//   });
+
+//   return updatedResponse;
+// };
+
+
 export const updateDonorResponseStatus = async (
   requesterId: string,
   responseId: string,
-  data: UpdateDonorResponseStatusInput
+  data: UpdateDonorResponseStatusInput,
 ) => {
-  const response = await prisma.donorResponse.findUnique({
-    where: {
-      id: responseId,
-    },
-    include: {
-      bloodRequest: true,
-    },
-  });
-
-  if (!response) {
-    throw new Error("Donor response not found");
-  }
-
-  if (response.bloodRequest.requesterId !== requesterId) {
-    throw new Error(
-      "You can only manage responses to your own blood requests"
-    );
-  }
-
-  if (response.status !== "PENDING") {
-    throw new Error("Only pending responses can be accepted or rejected");
-  }
-
-  if (data.status !== "ACCEPTED" && data.status !== "REJECTED") {
+  if (
+    data.status !== "ACCEPTED" &&
+    data.status !== "REJECTED"
+  ) {
     throw new Error("Status must be ACCEPTED or REJECTED");
   }
 
-  const updatedResponse = await prisma.donorResponse.update({
-    where: {
-      id: responseId,
-    },
-    data: {
-      status: data.status,
-      respondedAt: new Date(),
-    },
-  });
+  return prisma.$transaction(async (tx) => {
+    const response = await tx.donorResponse.findUnique({
+      where: { id: responseId },
+      include: { bloodRequest: true },
+    });
 
-  return updatedResponse;
+    if (!response) {
+      throw new Error("Donor response not found");
+    }
+
+    if (response.bloodRequest.requesterId !== requesterId) {
+      throw new Error(
+        "You can only manage responses to your own blood requests",
+      );
+    }
+
+    if (response.status !== "PENDING") {
+      throw new Error(
+        "Only pending responses can be accepted or rejected",
+      );
+    }
+
+    if (response.bloodRequest.status !== "PENDING") {
+      throw new Error(
+        "This blood request is no longer accepting responses",
+      );
+    }
+
+    // Rejecting a donor does not close the request.
+    if (data.status === "REJECTED") {
+      return tx.donorResponse.update({
+        where: { id: responseId },
+        data: {
+          status: "REJECTED",
+          respondedAt: new Date(),
+        },
+      });
+    }
+
+    // Atomically reserve the request for one selected donor.
+    const matchedRequest = await tx.bloodRequest.updateMany({
+      where: {
+        id: response.bloodRequestId,
+        requesterId,
+        status: "PENDING",
+      },
+      data: {
+        status: "MATCHED",
+      },
+    });
+
+    if (matchedRequest.count !== 1) {
+      throw new Error(
+        "This blood request has already been matched",
+      );
+    }
+
+    // Accept the selected donor.
+    const acceptedResponse = await tx.donorResponse.update({
+      where: { id: responseId },
+      data: {
+        status: "ACCEPTED",
+        respondedAt: new Date(),
+      },
+    });
+
+    // Reject every other pending donor response.
+    await tx.donorResponse.updateMany({
+      where: {
+        bloodRequestId: response.bloodRequestId,
+        id: { not: responseId },
+        status: "PENDING",
+      },
+      data: {
+        status: "REJECTED",
+        respondedAt: new Date(),
+      },
+    });
+
+    return acceptedResponse;
+  });
 };

@@ -2,19 +2,79 @@ import type { DonationStatus } from "../../../generated/prisma/enums.js";
 import { prisma } from "../../lib/prisma.js";
 import type { CreateDonationInput } from "./donation.interface.js";
 
+// export const createDonation = async (
+//   donorId: string,
+//   responseId: string,
+//   data: CreateDonationInput
+// ) => {
+//   const result = await prisma.$transaction(async (tx : any) => {
+//     const response = await tx.donorResponse.findUnique({
+//       where: {
+//         id: responseId,
+//       },
+//       include: {
+//         bloodRequest: true,
+//       },
+//     });
+
+//     if (!response) {
+//       throw new Error("Donor response not found");
+//     }
+
+//     if (response.donorId !== donorId) {
+//       throw new Error(
+//         "You can only create donation for your own response"
+//       );
+//     }
+
+//     if (response.status !== "ACCEPTED") {
+//       throw new Error(
+//         "Donation can only be created for an accepted donor response"
+//       );
+//     }
+
+//     const existingDonation = await tx.donation.findUnique({
+//       where: {
+//         responseId,
+//       },
+//     });
+
+//     if (existingDonation) {
+//       throw new Error("Donation already exists for this response");
+//     }
+
+//     const donation = await tx.donation.create({
+//       data: {
+//         bloodRequestId: response.bloodRequestId,
+//         donorId,
+//         responseId,
+//         donationDate: new Date(data.donationDate),
+//         units: data.units,
+//         status: data.status ?? "PENDING",
+//         ...(data.notes !== undefined && {
+//           notes: data.notes,
+//         }),
+//       },
+//     });
+
+//     return donation;
+//   });
+
+//   return result;
+// };
+
+// Get all donations for a specific donor
+
+
 export const createDonation = async (
   donorId: string,
   responseId: string,
-  data: CreateDonationInput
+  data: CreateDonationInput,
 ) => {
-  const result = await prisma.$transaction(async (tx : any) => {
+  return prisma.$transaction(async (tx) => {
     const response = await tx.donorResponse.findUnique({
-      where: {
-        id: responseId,
-      },
-      include: {
-        bloodRequest: true,
-      },
+      where: { id: responseId },
+      include: { bloodRequest: true },
     });
 
     if (!response) {
@@ -23,47 +83,49 @@ export const createDonation = async (
 
     if (response.donorId !== donorId) {
       throw new Error(
-        "You can only create donation for your own response"
+        "You can only create donation for your own response",
       );
     }
 
     if (response.status !== "ACCEPTED") {
       throw new Error(
-        "Donation can only be created for an accepted donor response"
+        "Donation can only be created for an accepted donor response",
+      );
+    }
+
+    if (response.bloodRequest.status !== "MATCHED") {
+      throw new Error(
+        "Donation can only be created for a matched blood request",
       );
     }
 
     const existingDonation = await tx.donation.findUnique({
-      where: {
-        responseId,
-      },
+      where: { responseId },
     });
 
     if (existingDonation) {
-      throw new Error("Donation already exists for this response");
+      throw new Error(
+        "Donation already exists for this response",
+      );
     }
 
-    const donation = await tx.donation.create({
+    return tx.donation.create({
       data: {
         bloodRequestId: response.bloodRequestId,
         donorId,
         responseId,
         donationDate: new Date(data.donationDate),
         units: data.units,
-        status: data.status ?? "PENDING",
-        ...(data.notes !== undefined && {
-          notes: data.notes,
-        }),
+        status: "PENDING",
+        ...(data.notes !== undefined
+          ? { notes: data.notes }
+          : {}),
       },
     });
-
-    return donation;
   });
-
-  return result;
 };
 
-// Get all donations for a specific donor
+
 export const getMyDonations = async (
   donorId: string,
   query: {

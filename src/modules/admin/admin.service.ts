@@ -151,41 +151,94 @@ export const updateUserStatus = async (
   return updatedUser;
 };
 
-export const verifyDonation = async (adminId: string, donationId: string) => {
-  const donation = await prisma.donation.findUnique({
-    where: { id: donationId },
-  });
+// export const verifyDonation = async (adminId: string, donationId: string) => {
+//   const donation = await prisma.donation.findUnique({
+//     where: { id: donationId },
+//   });
 
-  if (!donation) {
-    throw new Error("Donation not found");
-  }
+//   if (!donation) {
+//     throw new Error("Donation not found");
+//   }
 
-  if (donation.status !== "COMPLETED") {
-    throw new Error("Only completed donations can be verified");
-  }
+//   if (donation.status !== "COMPLETED") {
+//     throw new Error("Only completed donations can be verified");
+//   }
 
-  const verifiedDonation = await prisma.donation.update({
-    where: { id: donationId },
-    data: {
-      status: "VERIFIED",
-      verifiedAt: new Date(),
-    },
-  });
+//   const verifiedDonation = await prisma.donation.update({
+//     where: { id: donationId },
+//     data: {
+//       status: "VERIFIED",
+//       verifiedAt: new Date(),
+//     },
+//   });
 
-  await prisma.auditLog.create({
-    data: {
-      userId: adminId,
-      action: "VERIFY",
-      entity: "Donation",
-      entityId: donationId,
-      details: {
-        previousStatus: donation.status,
-        newStatus: "VERIFIED",
+//   await prisma.auditLog.create({
+//     data: {
+//       userId: adminId,
+//       action: "VERIFY",
+//       entity: "Donation",
+//       entityId: donationId,
+//       details: {
+//         previousStatus: donation.status,
+//         newStatus: "VERIFIED",
+//       },
+//     },
+//   });
+
+//   return verifiedDonation;
+// };
+
+
+export const verifyDonation = async (
+  adminId: string,
+  donationId: string,
+) => {
+  return prisma.$transaction(async (tx) => {
+    const result = await tx.donation.updateMany({
+      where: {
+        id: donationId,
+        status: "COMPLETED",
       },
-    },
-  });
+      data: {
+        status: "VERIFIED",
+        verifiedAt: new Date(),
+      },
+    });
 
-  return verifiedDonation;
+    if (result.count !== 1) {
+      const donation = await tx.donation.findUnique({
+        where: { id: donationId },
+        select: { id: true, status: true },
+      });
+
+      if (!donation) {
+        throw new Error("Donation not found");
+      }
+
+      throw new Error(
+        donation.status === "VERIFIED"
+          ? "Donation is already verified"
+          : "Only completed donations can be verified",
+      );
+    }
+
+    await tx.auditLog.create({
+      data: {
+        userId: adminId,
+        action: "VERIFY",
+        entity: "Donation",
+        entityId: donationId,
+        details: {
+          previousStatus: "COMPLETED",
+          newStatus: "VERIFIED",
+        },
+      },
+    });
+
+    return tx.donation.findUniqueOrThrow({
+      where: { id: donationId },
+    });
+  });
 };
 
 export const getAdminBloodRequests = async (
