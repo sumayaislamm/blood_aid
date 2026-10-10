@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma.js";
 import type {
-    GetAdminAuditLogsQuery,
+  GetAdminAuditLogsQuery,
   GetAdminBloodRequestsQuery,
   GetAdminDonationsQuery,
   GetAdminPaymentsQuery,
@@ -188,7 +188,6 @@ export const updateUserStatus = async (
 //   return verifiedDonation;
 // };
 
-
 // export const verifyDonation = async (
 //   adminId: string,
 //   donationId: string,
@@ -241,101 +240,126 @@ export const updateUserStatus = async (
 //   });
 // };
 
-
-export const verifyDonation = async (
-  adminId: string,
-  donationId: string,
-) => {
-  return prisma.$transaction(async (tx) => {
-    const donation = await tx.donation.findUnique({
-      where: { id: donationId },
-      include: {
-        bloodRequest: {
-          select: {
-            id: true,
-            units: true,
-            status: true,
+export const verifyDonation = async (adminId: string, donationId: string) => {
+  return prisma.$transaction(
+    async (tx) => {
+      const donation = await tx.donation.findUnique({
+        where: { id: donationId },
+        include: {
+          bloodRequest: {
+            select: {
+              id: true,
+              units: true,
+              status: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!donation) {
-      throw new Error("Donation not found");
-    }
+      if (!donation) {
+        throw new Error("Donation not found");
+      }
 
-    if (donation.status !== "COMPLETED") {
-      throw new Error(
-        donation.status === "VERIFIED"
-          ? "Donation is already verified"
-          : "Only completed donations can be verified",
-      );
-    }
+      if (donation.status !== "COMPLETED") {
+        throw new Error(
+          donation.status === "VERIFIED"
+            ? "Donation is already verified"
+            : "Only completed donations can be verified",
+        );
+      }
 
-    if (donation.bloodRequest.status !== "MATCHED") {
-      throw new Error("This blood request is no longer active");
-    }
+      if (donation.bloodRequest.status !== "MATCHED") {
+        throw new Error("This blood request is no longer active");
+      }
 
-    const result = await tx.donation.updateMany({
-      where: {
-        id: donationId,
-        status: "COMPLETED",
-      },
-      data: {
-        status: "VERIFIED",
-        verifiedAt: new Date(),
-      },
-    });
-
-    if (result.count !== 1) {
-      throw new Error("Donation status changed. Please try again.");
-    }
-
-    const verified = await tx.donation.aggregate({
-      where: {
-        bloodRequestId: donation.bloodRequestId,
-        status: "VERIFIED",
-      },
-      _sum: {
-        units: true,
-      },
-    });
-
-    const totalVerifiedUnits = verified._sum.units ?? 0;
-
-    if (totalVerifiedUnits >= donation.bloodRequest.units) {
-      await tx.bloodRequest.updateMany({
+      const result = await tx.donation.updateMany({
         where: {
-          id: donation.bloodRequestId,
-          status: "MATCHED",
+          id: donationId,
+          status: "COMPLETED",
         },
         data: {
-          status: "FULFILLED",
+          status: "VERIFIED",
+          verifiedAt: new Date(),
         },
       });
-    }
 
-    await tx.auditLog.create({
-      data: {
-        userId: adminId,
-        action: "VERIFY",
-        entity: "Donation",
-        entityId: donationId,
-        details: {
-          previousStatus: "COMPLETED",
-          newStatus: "VERIFIED",
-          totalVerifiedUnits,
-          requiredUnits: donation.bloodRequest.units,
+      if (result.count !== 1) {
+        throw new Error("Donation status changed. Please try again.");
+      }
+
+      const verified = await tx.donation.aggregate({
+        where: {
+          bloodRequestId: donation.bloodRequestId,
+          status: "VERIFIED",
         },
-      },
-    });
+        _sum: {
+          units: true,
+        },
+      });
 
-    return tx.donation.findUniqueOrThrow({
-      where: { id: donationId },
-    });
-  });
+      const totalVerifiedUnits = verified._sum.units ?? 0;
+
+      // if (totalVerifiedUnits >= donation.bloodRequest.units) {
+      //   await tx.bloodRequest.updateMany({
+      //     where: {
+      //       id: donation.bloodRequestId,
+      //       status: "MATCHED",
+      //     },
+      //     data: {
+      //       status: "FULFILLED",
+      //     },
+      //   });
+      // }
+
+      if (totalVerifiedUnits >= donation.bloodRequest.units) {
+        await tx.bloodRequest.updateMany({
+          where: {
+            id: donation.bloodRequestId,
+            status: "MATCHED",
+          },
+          data: {
+            status: "FULFILLED",
+          },
+        });
+
+        await tx.donorResponse.updateMany({
+          where: {
+            bloodRequestId: donation.bloodRequestId,
+            status: {
+              in: ["PENDING", "ACCEPTED"],
+            },
+          },
+          data: {
+            status: "REJECTED",
+            respondedAt: new Date(),
+          },
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          userId: adminId,
+          action: "VERIFY",
+          entity: "Donation",
+          entityId: donationId,
+          details: {
+            previousStatus: "COMPLETED",
+            newStatus: "VERIFIED",
+            totalVerifiedUnits,
+            requiredUnits: donation.bloodRequest.units,
+          },
+        },
+      });
+
+      return tx.donation.findUniqueOrThrow({
+        where: { id: donationId },
+      });
+    },
+    {
+      isolationLevel: "Serializable",
+    },
+  );
 };
-
 
 export const getAdminBloodRequests = async (
   query: GetAdminBloodRequestsQuery,

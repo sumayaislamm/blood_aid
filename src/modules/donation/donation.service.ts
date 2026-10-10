@@ -142,6 +142,8 @@ export const createDonation = async (
         ...(data.notes !== undefined ? { notes: data.notes } : {}),
       },
     });
+  }, {
+    isolationLevel: "Serializable",
   });
 };
 
