@@ -65,7 +65,6 @@ import type { CreateDonationInput } from "./donation.interface.js";
 
 // Get all donations for a specific donor
 
-
 export const createDonation = async (
   donorId: string,
   responseId: string,
@@ -82,9 +81,7 @@ export const createDonation = async (
     }
 
     if (response.donorId !== donorId) {
-      throw new Error(
-        "You can only create donation for your own response",
-      );
+      throw new Error("You can only create donation for your own response");
     }
 
     if (response.status !== "ACCEPTED") {
@@ -104,8 +101,32 @@ export const createDonation = async (
     });
 
     if (existingDonation) {
+      throw new Error("Donation already exists for this response");
+    }
+    const requestedUnits = Number(data.units);
+
+    if (!Number.isInteger(requestedUnits) || requestedUnits < 1) {
+      throw new Error("Donation units must be a positive integer");
+    }
+
+    const allocated = await tx.donation.aggregate({
+      where: {
+        bloodRequestId: response.bloodRequestId,
+        status: {
+          in: ["PENDING", "COMPLETED", "VERIFIED"],
+        },
+      },
+      _sum: {
+        units: true,
+      },
+    });
+
+    const alreadyAllocated = allocated._sum.units ?? 0;
+    const remainingUnits = response.bloodRequest.units - alreadyAllocated;
+
+    if (requestedUnits > remainingUnits) {
       throw new Error(
-        "Donation already exists for this response",
+        `Only ${remainingUnits} unit(s) remaining for this blood request`,
       );
     }
 
@@ -115,16 +136,14 @@ export const createDonation = async (
         donorId,
         responseId,
         donationDate: new Date(data.donationDate),
-        units: data.units,
+        // units: data.units,
+        units: requestedUnits,
         status: "PENDING",
-        ...(data.notes !== undefined
-          ? { notes: data.notes }
-          : {}),
+        ...(data.notes !== undefined ? { notes: data.notes } : {}),
       },
     });
   });
 };
-
 
 export const getMyDonations = async (
   donorId: string,
@@ -133,7 +152,7 @@ export const getMyDonations = async (
     limit?: string;
     sortBy?: string;
     sortOrder?: string;
-  }
+  },
 ) => {
   const page = Math.max(Number(query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(query.limit) || 10, 1), 100);
@@ -150,8 +169,7 @@ export const getMyDonations = async (
     ? query.sortBy!
     : "createdAt";
 
-  const sortOrder =
-    query.sortOrder === "asc" ? "asc" : "desc";
+  const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
 
   const skip = (page - 1) * limit;
 
@@ -200,12 +218,8 @@ export const getMyDonations = async (
   };
 };
 
-
 // Get a specific donation by ID for a specific donor
-export const getDonationById = async (
-  userId: string,
-  donationId: string
-) => {
+export const getDonationById = async (userId: string, donationId: string) => {
   const donation = await prisma.donation.findUnique({
     where: {
       id: donationId,
@@ -238,7 +252,7 @@ export const getDonationById = async (
 export const updateDonationStatus = async (
   userId: string,
   donationId: string,
-  status: DonationStatus
+  status: DonationStatus,
 ) => {
   const donation = await prisma.donation.findUnique({
     where: { id: donationId },
@@ -253,14 +267,12 @@ export const updateDonationStatus = async (
   // Donor can only mark their own pending donation as completed.
   if (status !== "COMPLETED") {
     throw new Error(
-      "Donors can only mark their donation as COMPLETED. Verification is done by admin."
+      "Donors can only mark their donation as COMPLETED. Verification is done by admin.",
     );
   }
 
   if (donation.status !== "PENDING") {
-    throw new Error(
-      "Only pending donations can be marked as completed"
-    );
+    throw new Error("Only pending donations can be marked as completed");
   }
 
   const updatedDonation = await prisma.donation.update({
