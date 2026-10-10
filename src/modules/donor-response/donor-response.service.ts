@@ -82,6 +82,7 @@ export const getMyDonorResponses = async (
       },
       include: {
         bloodRequest: true,
+        donation: true,
       },
       orderBy: {
         [sortBy]: sortOrder,
