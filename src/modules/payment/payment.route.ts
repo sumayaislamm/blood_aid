@@ -5,7 +5,7 @@ import {
 } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { createPaymentSchema } from "./payment.validation.js";
-import { initiatePayment, getPaymentById, getMyPaymentsController } from "./payment.controller.js";
+import { initiatePayment, getPaymentById, getMyPaymentsController, verifyStripeSession } from "./payment.controller.js";
 
 
 const router = Router();
@@ -23,6 +23,12 @@ router.get(
   authenticate,
   authorize("REQUESTER"),
   getMyPaymentsController
+);
+router.get(
+  "/verify-session",
+  authenticate,
+  authorize("REQUESTER"),
+  verifyStripeSession
 );
 
 router.get(
